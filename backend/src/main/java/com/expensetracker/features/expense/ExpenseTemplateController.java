@@ -3,6 +3,8 @@ package com.expensetracker.features.expense;
 import com.expensetracker.features.category.CategoryRepository;
 import com.expensetracker.repository.UserRepository;
 import com.expensetracker.service.UserDetailsImpl;
+import com.expensetracker.features.expense.ExpenseTemplate;
+import com.expensetracker.features.expense.ExpenseTemplateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -52,8 +54,9 @@ public class ExpenseTemplateController {
 
         ExpenseTemplate template = ExpenseTemplate.builder()
                 .user(userRepository.findById(userDetails.getId()).orElseThrow())
-                .category(request.get("categoryId") != null ?
-                        categoryRepository.findById(((Number) request.get("categoryId")).longValue()).orElse(null) : null)
+                .category(request.get("categoryId") != null
+                        ? categoryRepository.findById(((Number) request.get("categoryId")).longValue()).orElse(null)
+                        : null)
                 .name(request.get("name").toString())
                 .description(request.get("description").toString())
                 .amount(new java.math.BigDecimal(request.get("amount").toString()))

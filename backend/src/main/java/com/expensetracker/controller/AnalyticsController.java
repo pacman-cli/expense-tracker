@@ -57,6 +57,13 @@ public class AnalyticsController {
         return ResponseEntity.ok(analyticsService.getCategoryTrends(userDetails.getId(), months));
     }
 
+    @GetMapping("/by-category")
+    public ResponseEntity<List<Map<String, Object>>> getSpendingByCategory(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam(defaultValue = "30") int days) {
+        return ResponseEntity.ok(analyticsService.getSpendingByCategory(userDetails.getId(), days));
+    }
+
     @GetMapping("/export/csv")
     public void exportToCSV(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -80,8 +87,7 @@ public class AnalyticsController {
                     expense.getDate(),
                     expense.getDescription().replace("\"", "\"\""),
                     expense.getAmount(),
-                    expense.getCategory() != null ? expense.getCategory().getName() : "Uncategorized"
-            ));
+                    expense.getCategory() != null ? expense.getCategory().getName() : "Uncategorized"));
         }
 
         writer.flush();

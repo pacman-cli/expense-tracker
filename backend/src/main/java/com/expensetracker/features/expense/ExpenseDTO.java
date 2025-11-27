@@ -13,4 +13,6 @@ public class ExpenseDTO {
     private LocalDate date;
     private Long categoryId;
     private String categoryName;
+    private Long walletId;
+    private String walletName;
 }

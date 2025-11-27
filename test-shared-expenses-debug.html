@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shared Expenses Debug</title>
+    <style>
+        body { font-family: Arial; max-width: 1000px; margin: 20px auto; padding: 20px; background: #1a1a1a; color: #fff; }
+        .box { background: #2a2a2a; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #667eea; }
+        button { background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; margin: 5px; }
+        button:hover { background: #5568d3; }
+        pre { background: #1a1a1a; padding: 15px; border-radius: 6px; overflow-x: auto; font-size: 12px; border: 1px solid #444; }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+        .info { color: #60a5fa; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Shared Expenses Debug Tool</h1>
+    
+    <div class="box">
+        <h2>Step 1: Check Authentication</h2>
+        <button onclick="checkAuth()">Check Auth Status</button>
+        <div id="auth-result"></div>
+    </div>
+
+    <div class="box">
+        <h2>Step 2: Test Backend Direct</h2>
+        <button onclick="testBackendDirect()">Test Backend API</button>
+        <div id="backend-result"></div>
+    </div>
+
+    <div class="box">
+        <h2>Step 3: Test with Axios</h2>
+        <button onclick="testWithAxios()">Test with Axios Library</button>
+        <div id="axios-result"></div>
+    </div>
+
+    <div class="box">
+        <h2>Step 4: Go to Shared Expenses Page</h2>
+        <button onclick="window.location.href='http://localhost:3000/shared-expenses'">Open Shared Expenses</button>
+        <p class="info">Then open DevTools Console (F12) to see detailed logs</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+
+        function checkAuth() {
+            const result = document.getElementById('auth-result');
+            const token = localStorage.getItem('accessToken');
+            const refreshToken = localStorage.getItem('refreshToken');
+            
+            if (!token) {
+                result.innerHTML = `
+                    <pre class="error">❌ NOT AUTHENTICATED
+No accessToken in localStorage
+
+You need to login first at:
+<a href="http://localhost:3000/login" style="color: #60a5fa;">http://localhost:3000/login</a>
+
+Available users:
+- guest@example.com
+- puspopuspo@gmail.com
+- puspopuspo520@gmail.com</pre>
+                `;
+                return;
+            }
+
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const exp = new Date(payload.exp * 1000);
+                const isExpired = exp < new Date();
+                
+                result.innerHTML = `
+                    <pre class="success">✅ AUTHENTICATED
+
+User: ${payload.sub || 'Unknown'}
+Email: ${payload.email || 'Unknown'}
+Token expires: ${exp.toLocaleString()}
+Status: ${isExpired ? '<span class="error">EXPIRED</span>' : '<span class="success">VALID</span>'}
+Refresh token: ${refreshToken ? 'EXISTS' : 'MISSING'}
+
+Token preview:
+${token.substring(0, 50)}...</pre>
+                `;
+            } catch (e) {
+                result.innerHTML = `<pre class="error">❌ Invalid token format: ${e.message}</pre>`;
+            }
+        }
+
+        async function testBackendDirect() {
+            const result = document.getElementById('backend-result');
+            result.innerHTML = '<pre class="info">Testing...</pre>';
+            
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                result.innerHTML = '<pre class="error">❌ No token. Run Step 1 first.</pre>';
+                return;
+            }
+
+            try {
+                console.log('Testing:', API_URL + '/shared-expenses');
+                const response = await fetch(API_URL + '/shared-expenses', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `
+                        <pre class="success">✅ SUCCESS!
+
+Status: ${response.status}
+Data count: ${Array.isArray(data) ? data.length : 'N/A'}
+
+Response:
+${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <pre class="error">❌ ERROR
+
+Status: ${response.status}
+Message: ${data.error || data.message || 'Unknown error'}
+
+Full response:
+${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <pre class="error">❌ NETWORK ERROR
+
+${error.message}
+
+This could be:
+1. Backend not running (check port 8080)
+2. CORS issue
+3. Network connectivity problem
+
+Backend URL: ${API_URL}
+Check backend logs: tail -f backend.log</pre>
+                `;
+            }
+        }
+
+        async function testWithAxios() {
+            const result = document.getElementById('axios-result');
+            result.innerHTML = '<pre class="info">Testing with Axios...</pre>';
+            
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                result.innerHTML = '<pre class="error">❌ No token. Run Step 1 first.</pre>';
+                return;
+            }
+
+            try {
+                const response = await axios.get(API_URL + '/shared-expenses', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                result.innerHTML = `
+                    <pre class="success">✅ AXIOS SUCCESS!
+
+Status: ${response.status}
+Data count: ${response.data.length}
+
+Response:
+${JSON.stringify(response.data, null, 2).substring(0, 500)}...</pre>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <pre class="error">❌ AXIOS ERROR
+
+Message: ${error.message}
+Status: ${error.response?.status}
+Error: ${error.response?.data?.error || 'Unknown'}
+
+Full error:
+${JSON.stringify(error.response?.data || error.message, null, 2)}</pre>
+                `;
+            }
+        }
+
+        // Auto-run on load
+        window.onload = () => {
+            console.log('Debug tool loaded. Run tests in order.');
+            checkAuth();
+        };
+    </script>
+</body>
+</html>

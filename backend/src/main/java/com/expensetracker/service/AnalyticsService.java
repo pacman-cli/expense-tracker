@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -49,7 +50,8 @@ public class AnalyticsService {
         report.put("transactionCount", expenses.size());
         report.put("monthlyTotals", getMonthlyTotals(expenses, year));
         report.put("categoryBreakdown", getCategoryBreakdown(expenses));
-        report.put("averagePerMonth", calculateTotal(expenses).divide(BigDecimal.valueOf(12), 2, BigDecimal.ROUND_HALF_UP));
+        report.put("averagePerMonth",
+                calculateTotal(expenses).divide(BigDecimal.valueOf(12), 2, RoundingMode.HALF_UP));
 
         return report;
     }
@@ -61,25 +63,24 @@ public class AnalyticsService {
         LocalDate previousEnd = previousStart.withDayOfMonth(previousStart.lengthOfMonth());
 
         List<Expense> currentExpenses = expenseRepository.findByUserIdAndDateBetween(userId, currentStart, currentEnd);
-        List<Expense> previousExpenses = expenseRepository.findByUserIdAndDateBetween(userId, previousStart, previousEnd);
+        List<Expense> previousExpenses = expenseRepository.findByUserIdAndDateBetween(userId, previousStart,
+                previousEnd);
 
         BigDecimal currentTotal = calculateTotal(currentExpenses);
         BigDecimal previousTotal = calculateTotal(previousExpenses);
         BigDecimal change = currentTotal.subtract(previousTotal);
-        Double percentageChange = previousTotal.compareTo(BigDecimal.ZERO) > 0 ?
-                change.divide(previousTotal, 4, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)).doubleValue() : 0;
+        Double percentageChange = previousTotal.compareTo(BigDecimal.ZERO) > 0 ? change
+                .divide(previousTotal, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).doubleValue() : 0;
 
         Map<String, Object> comparison = new HashMap<>();
         comparison.put("current", Map.of(
                 "period", YearMonth.of(year, month).toString(),
                 "total", currentTotal,
-                "count", currentExpenses.size()
-        ));
+                "count", currentExpenses.size()));
         comparison.put("previous", Map.of(
                 "period", YearMonth.of(previousStart.getYear(), previousStart.getMonthValue()).toString(),
                 "total", previousTotal,
-                "count", previousExpenses.size()
-        ));
+                "count", previousExpenses.size()));
         comparison.put("change", change);
         comparison.put("percentageChange", percentageChange);
 
@@ -105,8 +106,26 @@ public class AnalyticsService {
         return categoryMonthly.entrySet().stream()
                 .map(entry -> Map.of(
                         "category", (Object) entry.getKey(),
-                        "monthlyData", (Object) entry.getValue()
-                ))
+                        "monthlyData", (Object) entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> getSpendingByCategory(Long userId, int days) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(days);
+
+        List<Expense> expenses = expenseRepository.findByUserIdAndDateBetween(userId, startDate, endDate);
+
+        Map<String, BigDecimal> categoryTotals = getCategoryBreakdown(expenses);
+
+        return categoryTotals.entrySet().stream()
+                .map(entry -> {
+                    Map<String, Object> categoryData = new HashMap<>();
+                    categoryData.put("name", entry.getKey());
+                    categoryData.put("total", entry.getValue().doubleValue());
+                    return categoryData;
+                })
+                .sorted((a, b) -> Double.compare((Double) b.get("total"), (Double) a.get("total")))
                 .collect(Collectors.toList());
     }
 
@@ -122,8 +141,7 @@ public class AnalyticsService {
         return expenses.stream()
                 .collect(Collectors.groupingBy(
                         e -> e.getCategory() != null ? e.getCategory().getName() : "Uncategorized",
-                        Collectors.reducing(BigDecimal.ZERO, Expense::getAmount, BigDecimal::add)
-                ));
+                        Collectors.reducing(BigDecimal.ZERO, Expense::getAmount, BigDecimal::add)));
     }
 
     private Map<LocalDate, BigDecimal> getDailyTotals(List<Expense> expenses, LocalDate start, LocalDate end) {
@@ -144,14 +162,13 @@ public class AnalyticsService {
         return expenses.stream()
                 .collect(Collectors.groupingBy(
                         e -> YearMonth.from(e.getDate()).toString(),
-                        Collectors.reducing(BigDecimal.ZERO, Expense::getAmount, BigDecimal::add)
-                ));
+                        Collectors.reducing(BigDecimal.ZERO, Expense::getAmount, BigDecimal::add)));
     }
 
     private BigDecimal calculateAveragePerDay(List<Expense> expenses, LocalDate start, LocalDate end) {
         long days = end.toEpochDay() - start.toEpochDay() + 1;
         BigDecimal total = calculateTotal(expenses);
-        return days > 0 ? total.divide(BigDecimal.valueOf(days), 2, BigDecimal.ROUND_HALF_UP) : BigDecimal.ZERO;
+        return days > 0 ? total.divide(BigDecimal.valueOf(days), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
     }
 
     private List<Map<String, Object>> getTopExpenses(List<Expense> expenses, int limit) {
@@ -162,8 +179,7 @@ public class AnalyticsService {
                         "description", (Object) e.getDescription(),
                         "amount", (Object) e.getAmount(),
                         "date", (Object) e.getDate(),
-                        "category", (Object) (e.getCategory() != null ? e.getCategory().getName() : "Uncategorized")
-                ))
+                        "category", (Object) (e.getCategory() != null ? e.getCategory().getName() : "Uncategorized")))
                 .collect(Collectors.toList());
     }
 
@@ -186,7 +202,6 @@ public class AnalyticsService {
 
         return Map.of(
                 "weekday", Map.of("total", weekdayTotal, "count", weekdayCount),
-                "weekend", Map.of("total", weekendTotal, "count", weekendCount)
-        );
+                "weekend", Map.of("total", weekendTotal, "count", weekendCount));
     }
 }

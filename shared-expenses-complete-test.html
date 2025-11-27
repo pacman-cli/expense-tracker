@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shared Expenses - Complete Test</title>
+    <style>
+        body { font-family: system-ui; max-width: 1200px; margin: 20px auto; padding: 20px; background: #0f172a; color: #e2e8f0; }
+        .section { background: #1e293b; padding: 25px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #3b82f6; }
+        h1 { color: #60a5fa; margin-bottom: 5px; }
+        h2 { color: #93c5fd; margin-top: 0; }
+        button { background: #3b82f6; color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; margin: 8px 8px 8px 0; font-size: 15px; font-weight: 500; transition: all 0.2s; }
+        button:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.4); }
+        button:disabled { background: #475569; cursor: not-allowed; transform: none; }
+        input { padding: 12px; border-radius: 6px; border: 2px solid #334155; background: #0f172a; color: #e2e8f0; width: 250px; font-size: 14px; margin: 5px; }
+        pre { background: #0f172a; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; border: 1px solid #334155; line-height: 1.5; }
+        .success { color: #34d399; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+        .info { color: #60a5fa; }
+        .step { background: #334155; padding: 15px; margin: 12px 0; border-radius: 8px; }
+        .step-num { background: #3b82f6; color: white; padding: 4px 12px; border-radius: 6px; font-weight: bold; margin-right: 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #334155; }
+        th { background: #334155; color: #93c5fd; font-weight: 600; }
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .badge-success { background: #059669; color: white; }
+        .badge-error { background: #dc2626; color: white; }
+        .badge-pending { background: #f59e0b; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Shared Expenses - Complete Test & Fix</h1>
+    <p style="color: #94a3b8;">This tool will diagnose and fix the 400 error issue</p>
+
+    <!-- STEP 1: LOGIN -->
+    <div class="section">
+        <h2><span class="step-num">1</span> Login</h2>
+        <div class="step">
+            <input type="email" id="email" placeholder="Email" value="guest@example.com">
+            <input type="password" id="password" placeholder="Password" value="password123">
+            <button onclick="login()">Login</button>
+            <button onclick="checkLoginStatus()">Check Login Status</button>
+        </div>
+        <div id="login-result"></div>
+    </div>
+
+    <!-- STEP 2: TEST API -->
+    <div class="section">
+        <h2><span class="step-num">2</span> Test Shared Expenses API</h2>
+        <div class="step">
+            <button onclick="testSharedExpensesAPI()" id="testApiBtn" disabled>Test API</button>
+            <button onclick="viewRawJSON()">View Raw JSON</button>
+        </div>
+        <div id="api-result"></div>
+    </div>
+
+    <!-- STEP 3: VIEW EXPENSES -->
+    <div class="section">
+        <h2><span class="step-num">3</span> Shared Expenses</h2>
+        <div id="expenses-list"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+        let currentToken = null;
+
+        function checkLoginStatus() {
+            const token = localStorage.getItem('accessToken');
+            const result = document.getElementById('login-result');
+            
+            if (token) {
+                currentToken = token;
+                document.getElementById('testApiBtn').disabled = false;
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    result.innerHTML = `<pre class="success">✅ LOGGED IN
+
+User: ${payload.sub}
+Email: ${payload.email || 'N/A'}
+Token expires: ${new Date(payload.exp * 1000).toLocaleString()}
+Status: ${new Date(payload.exp * 1000) > new Date() ? '<span class="success">VALID</span>' : '<span class="error">EXPIRED</span>'}
+
+Token: ${token.substring(0, 40)}...</pre>`;
+                } catch (e) {
+                    result.innerHTML = `<pre class="error">Token found but invalid format</pre>`;
+                }
+            } else {
+                currentToken = null;
+                document.getElementById('testApiBtn').disabled = true;
+                result.innerHTML = `<pre class="warning">⚠️ NOT LOGGED IN
+
+Please enter credentials and click Login</pre>`;
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const result = document.getElementById('login-result');
+            
+            result.innerHTML = '<pre class="info">🔄 Logging in...</pre>';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.token) {
+                    localStorage.setItem('accessToken', data.token);
+                    if (data.refreshToken) {
+                        localStorage.setItem('refreshToken', data.refreshToken);
+                    }
+                    currentToken = data.token;
+                    document.getElementById('testApiBtn').disabled = false;
+                    result.innerHTML = `<pre class="success">✅ LOGIN SUCCESSFUL!
+
+Email: ${email}
+Token: ${data.token.substring(0, 40)}...
+
+Now click "Test API" in Step 2</pre>`;
+                } else {
+                    result.innerHTML = `<pre class="error">❌ LOGIN FAILED
+
+Status: ${response.status}
+Message: ${data.message || data.error || 'Unknown error'}
+
+Try different credentials or check backend logs</pre>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<pre class="error">❌ LOGIN ERROR
+
+${error.message}
+
+Is backend running on port 8080?</pre>`;
+            }
+        }
+
+        async function testSharedExpensesAPI() {
+            const result = document.getElementById('api-result');
+            const expensesList = document.getElementById('expenses-list');
+            
+            result.innerHTML = '<pre class="info">🔄 Testing API...</pre>';
+            
+            if (!currentToken) {
+                result.innerHTML = '<pre class="error">❌ No token. Please login first.</pre>';
+                return;
+            }
+
+            try {
+                console.log('Making request to:', `${API_URL}/shared-expenses`);
+                console.log('With token:', currentToken.substring(0, 30) + '...');
+                
+                const response = await axios.get(`${API_URL}/shared-expenses`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+
+                console.log('Response:', response);
+
+                if (response.status === 200) {
+                    const expenses = response.data;
+                    result.innerHTML = `<pre class="success">✅ API SUCCESS!
+
+Status: ${response.status}
+Count: ${expenses.length} expenses
+
+API is working correctly!</pre>`;
+
+                    // Display expenses
+                    if (expenses.length === 0) {
+                        expensesList.innerHTML = '<pre class="warning">No shared expenses found in database</pre>';
+                    } else {
+                        displayExpenses(expenses);
+                    }
+                } else {
+                    result.innerHTML = `<pre class="error">❌ Unexpected status: ${response.status}</pre>`;
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                
+                let errorMsg = `<pre class="error">❌ API ERROR
+
+Message: ${error.message}
+`;
+                
+                if (error.response) {
+                    errorMsg += `Status: ${error.response.status}
+Status Text: ${error.response.statusText}
+`;
+                    if (error.response.status === 400) {
+                        errorMsg += `
+<span class="error">400 BAD REQUEST ERROR DETAILS:</span>
+
+This usually means:
+1. JSON serialization error (circular reference)
+2. Invalid data format
+3. Missing required fields
+
+Backend Response:
+${JSON.stringify(error.response.data, null, 2)}
+
+Check backend console for stack trace!
+`;
+                    } else if (error.response.status === 401) {
+                        errorMsg += `
+<span class="warning">401 UNAUTHORIZED</span>
+
+Token might be expired. Try logging in again.
+`;
+                    }
+                } else if (error.request) {
+                    errorMsg += `
+No response received from server.
+Check if backend is running: curl http://localhost:8080/actuator/health
+`;
+                }
+                
+                errorMsg += `</pre>`;
+                result.innerHTML = errorMsg;
+                expensesList.innerHTML = '';
+            }
+        }
+
+        function displayExpenses(expenses) {
+            const list = document.getElementById('expenses-list');
+            
+            let html = `<h3 style="color: #93c5fd;">${expenses.length} Shared Expenses</h3><table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Split Type</th>
+                        <th>Paid By</th>
+                        <th>Participants</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            expenses.forEach(exp => {
+                html += `<tr>
+                    <td>${exp.id}</td>
+                    <td>${exp.description || exp.expense?.description || 'N/A'}</td>
+                    <td>${exp.totalAmount} BDT</td>
+                    <td>${exp.splitType}</td>
+                    <td>${exp.paidBy?.email || exp.paidBy?.fullName || 'N/A'}</td>
+                    <td>${exp.participants?.length || 0}</td>
+                    <td>${exp.isSettled ? '<span class="badge badge-success">Settled</span>' : '<span class="badge badge-pending">Unsettled</span>'}</td>
+                </tr>`;
+            });
+            
+            html += `</tbody></table>`;
+            list.innerHTML = html;
+        }
+
+        async function viewRawJSON() {
+            if (!currentToken) {
+                alert('Please login first');
+                return;
+            }
+
+            try {
+                const response = await axios.get(`${API_URL}/shared-expenses`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                
+                const expensesList = document.getElementById('expenses-list');
+                expensesList.innerHTML = `<h3>Raw JSON Response:</h3><pre>${JSON.stringify(response.data, null, 2)}</pre>`;
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Auto-check on load
+        window.onload = () => {
+            checkLoginStatus();
+        };
+    </script>
+</body>
+</html>

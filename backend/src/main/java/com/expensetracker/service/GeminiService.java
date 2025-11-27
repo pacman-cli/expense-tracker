@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,13 +33,13 @@ public class GeminiService {
         }
 
         String prompt = String.format(
-            "Based on this expense description: '%s'\n" +
-            "Suggest the most appropriate category from: %s\n" +
-            "Reply with ONLY the category name, nothing else.",
-            description, String.join(", ", availableCategories)
-        );
+                "Based on this expense description: '%s'\n" +
+                        "Suggest the most appropriate category from: %s\n" +
+                        "Reply with ONLY the category name, nothing else.",
+                description, String.join(", ", availableCategories));
 
         try {
+            // call the api
             String response = callGeminiAPI(prompt);
             return response.trim();
         } catch (Exception e) {
@@ -61,11 +60,9 @@ public class GeminiService {
         prompt.append("Analyze these monthly expenses and provide brief insights:\n");
         prompt.append(String.format("Total Spending: $%.2f\n", totalSpending));
         prompt.append("Category Breakdown:\n");
-        
-        categoryTotals.forEach((category, amount) -> 
-            prompt.append(String.format("- %s: $%.2f (%.1f%%)\n", 
-                category, amount, (amount / totalSpending) * 100))
-        );
+
+        categoryTotals.forEach((category, amount) -> prompt.append(String.format("- %s: $%.2f (%.1f%%)\n",
+                category, amount, (amount / totalSpending) * 100)));
 
         prompt.append("\nProvide 3 bullet points:\n");
         prompt.append("1. Main spending insight\n");
@@ -90,7 +87,8 @@ public class GeminiService {
      * Detect anomalies in expenses
      */
     public boolean isAnomalous(double amount, String category, double avgForCategory) {
-        if (avgForCategory == 0) return false;
+        if (avgForCategory == 0)
+            return false;
         double deviation = Math.abs(amount - avgForCategory) / avgForCategory;
         return deviation > 1.5; // 150% above average
     }
@@ -100,7 +98,7 @@ public class GeminiService {
      */
     public Map<String, Double> suggestBudgets(Map<String, Double> pastSpending) {
         Map<String, Double> suggestions = new HashMap<>();
-        
+
         // Simple rule-based approach with 10% buffer
         pastSpending.forEach((category, avgSpending) -> {
             double recommendedBudget = avgSpending * 1.1;
@@ -124,12 +122,12 @@ public class GeminiService {
 
         try {
             String response = webClient.post()
-                .uri(endpoint)
-                .header("Content-Type", "application/json")
-                .bodyValue(request)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+                    .uri(endpoint)
+                    .header("Content-Type", "application/json")
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
 
             // Parse response
             JsonNode root = objectMapper.readTree(response);
@@ -158,8 +156,8 @@ public class GeminiService {
 
     private String getTopCategory(Map<String, Double> categoryTotals) {
         return categoryTotals.entrySet().stream()
-            .max(Map.Entry.comparingByValue())
-            .map(Map.Entry::getKey)
-            .orElse("N/A");
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("N/A");
     }
 }
