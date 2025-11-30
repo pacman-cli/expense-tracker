@@ -70,12 +70,18 @@ public class NudgeController {
             User user = userRepository
                 .findById(userDetails.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-            nudgeService.generateNudges(user);
+            int count = nudgeService.generateNudges(user);
             log.info(
-                "Nudges generated successfully for user: {}",
+                "Generated {} nudges for user: {}",
+                count,
                 userDetails.getId()
             );
-            return ResponseEntity.ok("Nudges generated successfully");
+            return ResponseEntity.ok(
+                Map.of(
+                    "message", "Nudges generated successfully",
+                    "count", count
+                )
+            );
         } catch (Exception e) {
             log.error(
                 "Failed to generate nudges for user: {}",

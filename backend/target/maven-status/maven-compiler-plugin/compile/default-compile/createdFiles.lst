@@ -1,9 +1,11 @@
+com/expensetracker/features/tax/TaxExportService$TaxSummary.class
 com/expensetracker/features/expense/ExpenseTemplate$ExpenseTemplateBuilder.class
 com/expensetracker/features/receipt/ReceiptService$ReceiptStatistics.class
 com/expensetracker/features/shared/SharedExpense$SharedExpenseBuilder.class
 com/expensetracker/service/RefreshTokenService.class
 com/expensetracker/features/debt/Debt.class
 com/expensetracker/features/budget/BudgetRepository.class
+com/expensetracker/exception/BusinessException.class
 com/expensetracker/features/expense/ExpenseTemplateController.class
 com/expensetracker/features/wallet/WalletRepository.class
 com/expensetracker/features/income/IncomeDTO$IncomeDTOBuilder.class
@@ -24,6 +26,7 @@ com/expensetracker/features/lifestyle/LifestyleReport$SpendingPattern.class
 com/expensetracker/features/shared/SharedExpenseDTO.class
 com/expensetracker/features/debt/DebtPayment$PaymentMethod.class
 com/expensetracker/security/AuthEntryPointJwt.class
+com/expensetracker/features/tax/TaxExportService$TaxExportRequest.class
 com/expensetracker/features/budget/BudgetController.class
 com/expensetracker/entity/RecurringExpense$RecurringExpenseBuilder.class
 com/expensetracker/features/receipt/ReceiptService.class
@@ -32,6 +35,7 @@ com/expensetracker/features/debt/Debt$PaymentFrequency.class
 com/expensetracker/features/shared/SharedExpenseParticipantDTO.class
 com/expensetracker/features/debt/DebtPayment.class
 com/expensetracker/features/prediction/PredictionRepository.class
+com/expensetracker/features/tax/TaxExportService$1.class
 com/expensetracker/features/nudge/NudgeService.class
 com/expensetracker/features/expense/ExpenseController.class
 com/expensetracker/features/expense/ExpenseRepository.class
@@ -51,6 +55,7 @@ com/expensetracker/features/lifestyle/LifestyleReport$LifestyleReportBuilder.cla
 com/expensetracker/features/income/IncomeDTO.class
 com/expensetracker/features/wallet/Wallet.class
 com/expensetracker/features/wallet/WalletController.class
+com/expensetracker/features/tax/TaxExportController.class
 com/expensetracker/features/shared/SharedExpense.class
 com/expensetracker/security/AuthTokenFilter.class
 com/expensetracker/entity/RecurringExpense$Frequency.class
@@ -93,6 +98,7 @@ com/expensetracker/features/budget/BudgetService.class
 com/expensetracker/features/receipt/ReceiptRepository.class
 com/expensetracker/features/expense/ExpenseTemplate.class
 com/expensetracker/features/receipt/Receipt$ReceiptBuilder.class
+com/expensetracker/features/tax/TaxExportService.class
 com/expensetracker/features/prediction/PredictionService.class
 com/expensetracker/features/lifestyle/LifestyleReport$LifestyleType.class
 com/expensetracker/features/tax/TaxExport$ExportStatus.class
@@ -135,6 +141,7 @@ com/expensetracker/entity/Role.class
 com/expensetracker/features/category/CategoryService.class
 com/expensetracker/features/lifestyle/LifestyleReportRepository.class
 com/expensetracker/features/lifestyle/LifestyleReport$FinancialHealthStatus.class
+com/expensetracker/config/DatabaseFixer.class
 com/expensetracker/dto/SignupRequest.class
 com/expensetracker/features/income/Income.class
 com/expensetracker/features/expense/Expense$ExpenseBuilder.class

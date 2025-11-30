@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,11 +37,13 @@ public class Budget extends BaseEntity {
     @Column(nullable = false)
     private Integer year; // e.g., 2024
 
+    @Builder.Default
     @Column(nullable = false)
     private BigDecimal spent = BigDecimal.ZERO;
 
     public double getPercentageUsed() {
-        if (amount.compareTo(BigDecimal.ZERO) == 0) return 0;
+        if (amount.compareTo(BigDecimal.ZERO) == 0)
+            return 0;
         return (spent.doubleValue() / amount.doubleValue()) * 100;
     }
 

@@ -27,6 +27,25 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { isAxiosError } from "axios";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface ApiUser {
     id: number;
@@ -39,8 +58,10 @@ interface ApiCategory {
 }
 
 interface ApiExpenseDetail {
+    id: number;
     description: string;
     date: string;
+    amount: number;
     category?: ApiCategory;
 }
 
@@ -77,6 +98,7 @@ interface Participant {
     isPaid: boolean;
     paidAt?: string;
     status: "PENDING" | "PAID" | "DISPUTED" | "WAIVED";
+    userId?: number; // Add userId for proper filtering
 }
 
 interface SharedExpense {
@@ -105,6 +127,27 @@ interface Summary {
     unsettledExpensesCount: number;
 }
 
+type ApiErrorResponse = {
+    error?: string;
+    message?: string;
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+    if (isAxiosError<ApiErrorResponse>(error)) {
+        const data = error.response?.data;
+        if (data?.error || data?.message) {
+            return data.error ?? data.message ?? fallback;
+        }
+        if (error.message) {
+            return error.message;
+        }
+    }
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return fallback;
+};
+
 export default function SharedExpensesPage() {
     const [activeTab, setActiveTab] = useState<"all" | "you-owe" | "owe-you">(
         "all",
@@ -124,14 +167,30 @@ export default function SharedExpensesPage() {
     const [error, setError] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState<number | null>(null);
 
-    useEffect(() => {
-        console.log("🚀 Shared Expenses Page - Initializing...");
-        console.log("Current URL:", window.location.href);
-        console.log(
-            "localStorage accessToken:",
-            localStorage.getItem("accessToken") ? "EXISTS" : "MISSING",
-        );
+    // Create shared expense dialog state
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+    const [expenses, setExpenses] = useState<ApiExpenseDetail[]>([]);
+    const [selectedExpenseId, setSelectedExpenseId] = useState<number | null>(
+        null,
+    );
+    const [splitType, setSplitType] = useState<
+        "EQUAL" | "PERCENTAGE" | "EXACT_AMOUNT" | "SHARES"
+    >("EQUAL");
+    const [groupName, setGroupName] = useState("");
+    const [description, setDescription] = useState("");
+    const [participants, setParticipants] = useState<
+        Array<{
+            userId?: number;
+            externalName?: string;
+            externalEmail?: string;
+            shareAmount?: number;
+            sharePercentage?: number;
+            shareUnits?: number;
+        }>
+    >([{}]);
+    const [creating, setCreating] = useState(false);
 
+    useEffect(() => {
         fetchCurrentUser();
         fetchExpenses();
         fetchSummary();
@@ -139,11 +198,8 @@ export default function SharedExpensesPage() {
 
     const fetchCurrentUser = async () => {
         try {
-            const response = await fetch("/api/users/me");
-            if (response.ok) {
-                const user = await response.json();
-                setCurrentUserId(user.id);
-            }
+            const response = await api.get("/users/me");
+            setCurrentUserId(response.data.id);
         } catch (error) {
             console.error("Failed to fetch current user", error);
         }
@@ -153,14 +209,9 @@ export default function SharedExpensesPage() {
         try {
             setLoading(true);
             setError(null);
-            console.log("🔍 Fetching shared expenses...");
-            console.log("API Base URL:", "http://localhost:8080/api");
-            console.log("Token exists:", !!localStorage.getItem("accessToken"));
 
             const response = await api.get("/shared-expenses");
-            console.log("✅ Response received:", response.status);
             const data = response.data as ApiSharedExpense[];
-            console.log("📊 Data count:", data.length);
             const mappedData = data.map((item: ApiSharedExpense) => ({
                 id: item.id,
                 title:
@@ -191,32 +242,21 @@ export default function SharedExpensesPage() {
                         isPaid: p.isPaid,
                         paidAt: p.paidAt,
                         status: p.status,
+                        userId: p.user?.id, // Add userId for proper filtering
                     })) || [],
             }));
             setSharedExpenses(mappedData);
-        } catch (error: any) {
-            console.error("❌ Failed to fetch shared expenses", error);
-            console.error("Error details:", {
-                message: error?.message,
-                status: error?.response?.status,
-                data: error?.response?.data,
-                config: error?.config,
-            });
+        } catch (error) {
+            console.error("Failed to fetch shared expenses", error);
+            const errorMsg = getErrorMessage(
+                error,
+                "Failed to fetch shared expenses",
+            );
 
-            let errorMsg = "Network error: Unable to fetch shared expenses";
-
-            if (error?.response?.status === 401) {
-                errorMsg = "Authentication failed. Please log in again.";
-                console.error(
-                    "🔐 Authentication issue - redirecting to login in 2s",
-                );
+            if (isAxiosError(error) && error.response?.status === 401) {
                 setTimeout(() => {
                     window.location.href = "/login";
                 }, 2000);
-            } else if (error?.response?.data?.error) {
-                errorMsg = error.response.data.error;
-            } else if (error?.message) {
-                errorMsg = `Error: ${error.message}`;
             }
 
             setError(errorMsg);
@@ -230,9 +270,23 @@ export default function SharedExpensesPage() {
         try {
             const response = await api.get("/shared-expenses/summary");
             setSummary(response.data);
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to fetch summary", error);
-            toast.error("Failed to fetch summary");
+            toast.error(
+                getErrorMessage(error, "Failed to fetch summary"),
+            );
+        }
+    };
+
+    const fetchExpensesForCreate = async () => {
+        try {
+            const response = await api.get("/expenses?page=0&size=100");
+            setExpenses(response.data.content || []);
+        } catch (error) {
+            console.error("Failed to fetch expenses", error);
+            toast.error(
+                getErrorMessage(error, "Failed to fetch expenses"),
+            );
         }
     };
 
@@ -245,11 +299,11 @@ export default function SharedExpensesPage() {
             await fetchExpenses();
             await fetchSummary();
             toast.success("Payment marked successfully!");
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to pay share", error);
-            const errorMsg =
-                error?.response?.data?.error || "Failed to mark payment";
-            toast.error(errorMsg);
+            toast.error(
+                getErrorMessage(error, "Failed to mark payment"),
+            );
         } finally {
             setActionLoading(null);
         }
@@ -270,11 +324,11 @@ export default function SharedExpensesPage() {
             await fetchExpenses();
             await fetchSummary();
             toast.success("Expense settled successfully!");
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to settle expense", error);
-            const errorMsg =
-                error?.response?.data?.error || "Failed to settle expense";
-            toast.error(errorMsg);
+            toast.error(
+                getErrorMessage(error, "Failed to settle expense"),
+            );
         } finally {
             setActionLoading(null);
         }
@@ -291,20 +345,68 @@ export default function SharedExpensesPage() {
             await fetchExpenses();
             await fetchSummary();
             toast.success("Expense deleted successfully!");
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to delete expense", error);
-            const errorMsg =
-                error?.response?.data?.error || "Failed to delete expense";
-            toast.error(errorMsg);
+            toast.error(
+                getErrorMessage(error, "Failed to delete expense"),
+            );
         } finally {
             setActionLoading(null);
         }
     };
 
+    const handleCreateSharedExpense = async () => {
+        if (!selectedExpenseId) {
+            toast.error("Please select an expense");
+            return;
+        }
+
+        if (participants.length === 0) {
+            toast.error("Please add at least one participant");
+            return;
+        }
+
+        try {
+            setCreating(true);
+            await api.post("/shared-expenses", {
+                expenseId: selectedExpenseId,
+                splitType,
+                groupName: groupName || null,
+                description: description || null,
+                participants: participants.map((p) => ({
+                    userId: p.userId || null,
+                    externalName: p.externalName || null,
+                    externalEmail: p.externalEmail || null,
+                    shareAmount: p.shareAmount || null,
+                    sharePercentage: p.sharePercentage || null,
+                    shareUnits: p.shareUnits || null,
+                })),
+            });
+            toast.success("Shared expense created successfully!");
+            setIsCreateDialogOpen(false);
+            // Reset form
+            setSelectedExpenseId(null);
+            setSplitType("EQUAL");
+            setGroupName("");
+            setDescription("");
+            setParticipants([{}]);
+            await fetchExpenses();
+            await fetchSummary();
+        } catch (error) {
+            console.error("Failed to create shared expense", error);
+            toast.error(
+                getErrorMessage(error, "Failed to create shared expense"),
+            );
+        } finally {
+            setCreating(false);
+        }
+    };
+
     const filteredExpenses = sharedExpenses.filter((exp) => {
         const isPaidByMe = currentUserId && exp.paidBy.id === currentUserId;
+        // Fix: Compare participant.userId (not participant.id) with currentUserId
         const myParticipant = exp.participants.find(
-            (p) => p.id === currentUserId,
+            (p) => p.userId === currentUserId,
         );
 
         // Filter by tab
@@ -378,7 +480,7 @@ export default function SharedExpensesPage() {
                         </div>
                         <Split className="w-12 h-12 text-purple-600" />
                     </div>
-                    <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    <h1 className="text-5xl font-bold bg-linear-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                         Shared Expenses
                     </h1>
                     <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -455,7 +557,7 @@ export default function SharedExpensesPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className={`bg-gradient-to-br ${stat.bgColor} rounded-2xl p-6 shadow-lg border border-border hover:shadow-xl transition-all`}
+                            className={`bg-linear-to-br ${stat.bgColor} rounded-2xl p-6 shadow-lg border border-border hover:shadow-xl transition-all`}
                         >
                             <div className="flex items-start justify-between mb-3">
                                 <div className="p-3 rounded-xl bg-card shadow-sm">
@@ -508,20 +610,23 @@ export default function SharedExpensesPage() {
                                                 | "owe-you",
                                         )
                                     }
-                                    className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${activeTab === tab.id ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg" : "bg-muted text-foreground hover:bg-muted/80"}`}
+                                    className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${activeTab === tab.id ? "bg-linear-to-r from-indigo-500 to-purple-500 text-white shadow-lg" : "bg-muted text-foreground hover:bg-muted/80"}`}
                                 >
                                     <tab.icon className="w-5 h-5" />
                                     {tab.label}
                                 </button>
                             ))}
                         </div>
-                        <a
-                            href="/expenses"
-                            className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
+                        <Button
+                            onClick={() => {
+                                fetchExpensesForCreate();
+                                setIsCreateDialogOpen(true);
+                            }}
+                            className="px-6 py-3 bg-linear-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                         >
                             <Plus className="w-5 h-5" />
-                            Create Expense First
-                        </a>
+                            Create Shared Expense
+                        </Button>
                     </div>
 
                     {/* Filters */}
@@ -573,8 +678,9 @@ export default function SharedExpensesPage() {
                             const isPaidByMe =
                                 currentUserId &&
                                 expense.paidBy.id === currentUserId;
+                            // Fix: Compare participant.userId (not participant.id) with currentUserId
                             const myParticipant = expense.participants.find(
-                                (p) => p.id === currentUserId,
+                                (p) => p.userId === currentUserId,
                             );
 
                             return (
@@ -773,7 +879,7 @@ export default function SharedExpensesPage() {
                                             {!expense.isSettled && (
                                                 <>
                                                     {isPaidByMe ? (
-                                                        <button
+                                                        <Button
                                                             onClick={() =>
                                                                 handleSettleExpense(
                                                                     expense.id,
@@ -783,7 +889,7 @@ export default function SharedExpensesPage() {
                                                                 actionLoading ===
                                                                 expense.id
                                                             }
-                                                            className="flex-1 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 font-semibold disabled:opacity-50"
+                                                            className="flex-1 px-4 py-2 bg-linear-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 font-semibold disabled:opacity-50"
                                                         >
                                                             {actionLoading ===
                                                             expense.id ? (
@@ -792,11 +898,11 @@ export default function SharedExpensesPage() {
                                                                 <CheckCircle2 className="w-4 h-4" />
                                                             )}
                                                             Settle All
-                                                        </button>
+                                                        </Button>
                                                     ) : (
                                                         myParticipant &&
                                                         !myParticipant.isPaid && (
-                                                            <button
+                                                            <Button
                                                                 onClick={() =>
                                                                     handlePayShare(
                                                                         expense.id,
@@ -807,7 +913,7 @@ export default function SharedExpensesPage() {
                                                                     actionLoading ===
                                                                     myParticipant.id
                                                                 }
-                                                                className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 font-semibold disabled:opacity-50"
+                                                                className="flex-1 px-4 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 font-semibold disabled:opacity-50"
                                                             >
                                                                 {actionLoading ===
                                                                 myParticipant.id ? (
@@ -816,14 +922,14 @@ export default function SharedExpensesPage() {
                                                                     <CreditCard className="w-4 h-4" />
                                                                 )}
                                                                 Pay My Share
-                                                            </button>
+                                                            </Button>
                                                         )
                                                     )}
                                                 </>
                                             )}
                                             {isPaidByMe &&
                                                 !expense.isSettled && (
-                                                    <button
+                                                    <Button
                                                         onClick={() =>
                                                             handleDeleteExpense(
                                                                 expense.id,
@@ -833,10 +939,11 @@ export default function SharedExpensesPage() {
                                                             actionLoading ===
                                                             expense.id
                                                         }
-                                                        className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-all"
+                                                        variant="destructive"
+                                                        className="px-4 py-2"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
-                                                    </button>
+                                                    </Button>
                                                 )}
                                             {expense.isSettled && (
                                                 <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-lg font-semibold">
@@ -872,6 +979,169 @@ export default function SharedExpensesPage() {
                     </motion.div>
                 )}
             </div>
+
+            {/* Create Shared Expense Dialog */}
+            <Dialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+            >
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Create Shared Expense</DialogTitle>
+                        <DialogDescription>
+                            Select an expense and split it with others
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Select Expense</Label>
+                            <Select
+                                value={selectedExpenseId?.toString() || ""}
+                                onValueChange={(value) =>
+                                    setSelectedExpenseId(parseInt(value))
+                                }
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Choose an expense" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {expenses.map((exp) => (
+                                        <SelectItem
+                                            key={exp.id}
+                                            value={exp.id.toString()}
+                                        >
+                                            {exp.description} - $
+                                            {exp.amount.toFixed(2)}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <Label>Split Type</Label>
+                            <Select
+                                value={splitType}
+                                onValueChange={(value: any) =>
+                                    setSplitType(value)
+                                }
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="EQUAL">Equal Split</SelectItem>
+                                    <SelectItem value="PERCENTAGE">
+                                        Percentage
+                                    </SelectItem>
+                                    <SelectItem value="EXACT_AMOUNT">
+                                        Exact Amount
+                                    </SelectItem>
+                                    <SelectItem value="SHARES">Shares</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <Label>Group Name (Optional)</Label>
+                            <Input
+                                value={groupName}
+                                onChange={(e) => setGroupName(e.target.value)}
+                                placeholder="e.g., Roommates, Friends"
+                            />
+                        </div>
+                        <div>
+                            <Label>Description (Optional)</Label>
+                            <Input
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Additional notes"
+                            />
+                        </div>
+                        <div>
+                            <Label>Participants</Label>
+                            <div className="space-y-2">
+                                {participants.map((p, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex gap-2 items-end"
+                                    >
+                                        <Input
+                                            placeholder="Email or name"
+                                            value={p.externalName || ""}
+                                            onChange={(e) => {
+                                                const newParticipants = [
+                                                    ...participants,
+                                                ];
+                                                newParticipants[idx] = {
+                                                    ...newParticipants[idx],
+                                                    externalName: e.target.value,
+                                                };
+                                                setParticipants(newParticipants);
+                                            }}
+                                            className="flex-1"
+                                        />
+                                        {splitType === "EXACT_AMOUNT" && (
+                                            <Input
+                                                type="number"
+                                                placeholder="Amount"
+                                                value={p.shareAmount || ""}
+                                                onChange={(e) => {
+                                                    const newParticipants = [
+                                                        ...participants,
+                                                    ];
+                                                    newParticipants[idx] = {
+                                                        ...newParticipants[idx],
+                                                        shareAmount: parseFloat(
+                                                            e.target.value,
+                                                        ),
+                                                    };
+                                                    setParticipants(
+                                                        newParticipants,
+                                                    );
+                                                }}
+                                                className="w-32"
+                                            />
+                                        )}
+                                        {idx === participants.length - 1 && (
+                                            <Button
+                                                type="button"
+                                                onClick={() =>
+                                                    setParticipants([
+                                                        ...participants,
+                                                        {},
+                                                    ])
+                                                }
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsCreateDialogOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleCreateSharedExpense}
+                            disabled={creating}
+                        >
+                            {creating ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                    Creating...
+                                </>
+                            ) : (
+                                "Create"
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

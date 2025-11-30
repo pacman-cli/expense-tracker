@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Plus, Trash2, Search, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -50,18 +50,27 @@ export default function ExpensesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+
   // New expense form state
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [categoryId, setCategoryId] = useState("");
   const [walletId, setWalletId] = useState("");
-  
+
   // Categories & Wallets
-  const [categories, setCategories] = useState<Array<{ id: number; name: string }>>([]);
+  const [categories, setCategories] = useState<
+    Array<{ id: number; name: string }>
+  >([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
-  const suggestedCategories = ["Food", "Transport", "Shopping", "Entertainment", "Bills", "Other"];
+  const suggestedCategories = [
+    "Food",
+    "Transport",
+    "Shopping",
+    "Entertainment",
+    "Bills",
+    "Other",
+  ];
 
   const fetchExpenses = async () => {
     try {
@@ -98,8 +107,6 @@ export default function ExpensesPage() {
     }
   };
 
-
-
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -108,14 +115,14 @@ export default function ExpensesPage() {
         amount: parseFloat(amount),
         date,
       };
-      
+
       if (categoryId) {
         requestData.categoryId = parseInt(categoryId);
       }
       if (walletId) {
         requestData.walletId = parseInt(walletId);
       }
-      
+
       await api.post("/expenses", requestData);
       setIsDialogOpen(false);
       fetchExpenses();
@@ -135,7 +142,7 @@ export default function ExpensesPage() {
     // For now simple toast
     try {
       await api.delete(`/expenses/${id}`);
-      setExpenses(expenses.filter(e => e.id !== id));
+      setExpenses(expenses.filter((e) => e.id !== id));
       toast.success("Expense deleted");
     } catch (error) {
       console.error("Failed to delete expense", error);
@@ -143,17 +150,22 @@ export default function ExpensesPage() {
     }
   };
 
-  const filteredExpenses = expenses.filter(expense => 
+  const filteredExpenses = expenses.filter((expense) =>
     expense.description.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Expenses</h2>
+        <h2 className="text-3xl font-bold tracking-tight bg-linear-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+          Expenses
+        </h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="border-primary/20 hover:bg-primary/10 hover:border-primary/40">
+            <Button
+              variant="outline"
+              className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
+            >
               <Plus className="mr-2 h-4 w-4" /> Add Expense
             </Button>
           </DialogTrigger>
@@ -224,10 +236,14 @@ export default function ExpensesPage() {
 
                 {/* Suggested Categories */}
                 <div className="grid gap-2">
-                  <Label className="text-sm text-muted-foreground">Quick Select</Label>
+                  <Label className="text-sm text-muted-foreground">
+                    Quick Select
+                  </Label>
                   <div className="flex flex-wrap gap-2">
                     {suggestedCategories.map((catName) => {
-                      const matchingCat = categories.find(c => c.name.toLowerCase() === catName.toLowerCase());
+                      const matchingCat = categories.find(
+                        (c) => c.name.toLowerCase() === catName.toLowerCase()
+                      );
                       return (
                         <Button
                           key={catName}
@@ -235,7 +251,10 @@ export default function ExpensesPage() {
                           variant="outline"
                           size="sm"
                           className="text-xs"
-                          onClick={() => matchingCat && setCategoryId(matchingCat.id.toString())}
+                          onClick={() =>
+                            matchingCat &&
+                            setCategoryId(matchingCat.id.toString())
+                          }
                         >
                           {catName}
                         </Button>
@@ -262,7 +281,9 @@ export default function ExpensesPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit" className="w-full">Add Expense</Button>
+                <Button type="submit" className="w-full">
+                  Add Expense
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -288,44 +309,64 @@ export default function ExpensesPage() {
             <table className="w-full caption-bottom text-sm">
               <thead className="[&_tr]:border-b">
                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Description</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Category</th>
-                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Amount</th>
-                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Date
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Description
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Category
+                  </th>
+                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                    Amount
+                  </th>
+                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="h-24 text-center">Loading...</td>
+                    <td colSpan={5} className="h-24 text-center">
+                      Loading...
+                    </td>
                   </tr>
                 ) : filteredExpenses.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="h-24 text-center">
                       <div className="flex flex-col items-center justify-center py-6 text-center">
                         <Inbox className="h-12 w-12 text-muted-foreground/50 mb-2" />
-                        <p className="text-lg font-medium text-muted-foreground">No expenses found</p>
-                        <p className="text-sm text-muted-foreground/60">Add a new expense to get started.</p>
+                        <p className="text-lg font-medium text-muted-foreground">
+                          No expenses found
+                        </p>
+                        <p className="text-sm text-muted-foreground/60">
+                          Add a new expense to get started.
+                        </p>
                       </div>
                     </td>
                   </tr>
                 ) : (
                   filteredExpenses.map((expense) => (
-                    <motion.tr 
+                    <motion.tr
                       key={expense.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                     >
                       <td className="p-4 align-middle">{expense.date}</td>
-                      <td className="p-4 align-middle font-medium">{expense.description}</td>
+                      <td className="p-4 align-middle font-medium">
+                        {expense.description}
+                      </td>
                       <td className="p-4 align-middle">
                         <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
                           {expense.category?.name || "Uncategorized"}
                         </span>
                       </td>
-                      <td className="p-4 align-middle text-right">৳{expense.amount.toFixed(2)}</td>
+                      <td className="p-4 align-middle text-right">
+                        ৳{expense.amount.toFixed(2)}
+                      </td>
                       <td className="p-4 align-middle text-right">
                         <Button
                           variant="ghost"

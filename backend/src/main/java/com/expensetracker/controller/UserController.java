@@ -7,6 +7,8 @@ import com.expensetracker.entity.User;
 import com.expensetracker.repository.UserRepository;
 import com.expensetracker.service.UserDetailsImpl;
 import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -56,5 +58,22 @@ public class UserController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("Password changed successfully!"));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("id", user.getId());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("fullName", user.getFullName());
+        userInfo.put("username", user.getEmail());
+
+        return ResponseEntity.ok(userInfo);
     }
 }

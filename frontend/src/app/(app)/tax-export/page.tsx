@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { isAxiosError } from "axios";
 
 interface TaxExport {
     id: number;
@@ -76,12 +77,34 @@ export default function TaxExportPage() {
         fetchPreview(new Date().getFullYear());
     }, []);
 
+    type ApiErrorResponse = {
+        error?: string;
+        message?: string;
+    };
+
+    const getErrorMessage = (error: unknown, fallback: string) => {
+        if (isAxiosError<ApiErrorResponse>(error)) {
+            const data = error.response?.data;
+            if (data?.error || data?.message) {
+                return data.error ?? data.message ?? fallback;
+            }
+            if (error.message) {
+                return error.message;
+            }
+        }
+        if (error instanceof Error) {
+            return error.message;
+        }
+        return fallback;
+    };
+
     const fetchExports = async () => {
         try {
             const res = await api.get("/tax-exports");
             setExports(res.data);
-        } catch (error: any) {
-            toast.error(error?.response?.data?.error || "Failed to load tax exports");
+        } catch (error) {
+            console.error("Failed to fetch tax exports", error);
+            toast.error(getErrorMessage(error, "Failed to load tax exports"));
         } finally {
             setLoading(false);
         }
@@ -91,7 +114,7 @@ export default function TaxExportPage() {
         try {
             const res = await api.get(`/tax-exports/preview?taxYear=${year}`);
             setPreview(res.data);
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to fetch preview", error);
         }
     };
@@ -110,8 +133,9 @@ export default function TaxExportPage() {
                 startDate: "",
                 endDate: "",
             });
-        } catch (error: any) {
-            toast.error(error?.response?.data?.error || "Failed to generate tax export");
+        } catch (error) {
+            console.error("Failed to generate tax export", error);
+            toast.error(getErrorMessage(error, "Failed to generate tax export"));
         } finally {
             setGenerating(false);
         }
@@ -131,8 +155,9 @@ export default function TaxExportPage() {
             document.body.removeChild(link);
 
             toast.success("Download started!");
-        } catch (error: any) {
-            toast.error(error?.response?.data?.error || "Failed to download export");
+        } catch (error) {
+            console.error("Failed to download export", error);
+            toast.error(getErrorMessage(error, "Failed to download export"));
         }
     };
 
@@ -142,8 +167,9 @@ export default function TaxExportPage() {
             await api.delete(`/tax-exports/${exportId}`);
             toast.success("Export deleted successfully");
             fetchExports();
-        } catch (error: any) {
-            toast.error(error?.response?.data?.error || "Failed to delete export");
+        } catch (error) {
+            console.error("Failed to delete export", error);
+            toast.error(getErrorMessage(error, "Failed to delete export"));
         }
     };
 

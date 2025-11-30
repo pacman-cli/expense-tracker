@@ -78,6 +78,7 @@
 /Users/puspo/Desktop/antigravitydemo/backend/src/main/java/com/expensetracker/features/category/CategoryService.java
 /Users/puspo/Desktop/antigravitydemo/backend/src/main/java/com/expensetracker/service/RefreshTokenService.java
 /Users/puspo/Desktop/antigravitydemo/backend/src/main/java/com/expensetracker/features/expense/ExpenseDTO.java
+/Users/puspo/Desktop/antigravitydemo/backend/src/main/java/com/expensetracker/config/DatabaseFixer.java
 /Users/puspo/Desktop/antigravitydemo/backend/src/main/java/com/expensetracker/controller/AnalyticsController.java
 /Users/puspo/Desktop/antigravitydemo/backend/src/main/java/com/expensetracker/features/budget/BudgetController.java
 /Users/puspo/Desktop/antigravitydemo/backend/src/main/java/com/expensetracker/service/UserDetailsServiceImpl.java

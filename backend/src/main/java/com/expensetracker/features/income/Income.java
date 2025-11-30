@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
