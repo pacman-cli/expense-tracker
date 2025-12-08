@@ -1,19 +1,72 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  mysql:
+  db:
     image: mysql:8.0
-    container_name: expense_tracker_db
-    restart: always
+    container_name: mysql-db
+    restart: unless-stopped
     environment:
-      MYSQL_DATABASE: expensetracker
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_USER: expenseuser
-      MYSQL_PASSWORD: expensepassword
-    ports:
-      - "3307:3306"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    depends_on:
+      - db
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      SPRING_PROFILES_ACTIVE: default
+    ports:
+      - "8080:8080"   # optional: can omit if only proxied by nginx
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_BASE: /api
+    ports:
+      - "3000:3000"  # optional: can omit if only proxied by nginx
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:stable
+    container_name: nginx
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
 
 volumes:
-  mysql_data:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -240,7 +241,7 @@ export default function WalletsPage() {
         "#f97316",
     ];
 
-    const containerVariants = {
+    const containerVariants: Variants = {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
@@ -250,7 +251,7 @@ export default function WalletsPage() {
         },
     };
 
-    const itemVariants = {
+    const itemVariants: Variants = {
         hidden: { y: 20, opacity: 0 },
         visible: {
             y: 0,
@@ -576,8 +577,8 @@ export default function WalletsPage() {
                                                 cx="50%"
                                                 cy="50%"
                                                 labelLine={false}
-                                                label={({ name, percent }) =>
-                                                    `${name} (${(percent * 100).toFixed(0)}%)`
+                                                label={({ name, percent }: { name?: string | number; percent?: number }) =>
+                                                    `${name ?? ""} (${((percent || 0) * 100).toFixed(0)}%)`
                                                 }
                                                 outerRadius={100}
                                                 fill="#8884d8"
