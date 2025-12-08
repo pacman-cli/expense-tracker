@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,9 +37,15 @@ public class ExpenseTemplate extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean active = true;
+
+    @Builder.Default
     @Column(nullable = false)
     private Boolean favorite = false;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer usageCount = 0;
 

@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,16 +25,12 @@ public class SharedExpense extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "expense_id", nullable = false)
-    @JsonIgnoreProperties(
-        { "user", "wallet", "hibernateLazyInitializer", "handler" }
-    )
+    @JsonIgnoreProperties({ "user", "wallet", "hibernateLazyInitializer", "handler" })
     private Expense expense;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "paid_by_user_id", nullable = false)
-    @JsonIgnoreProperties(
-        { "password", "refreshToken", "hibernateLazyInitializer", "handler" }
-    )
+    @JsonIgnoreProperties({ "password", "refreshToken", "hibernateLazyInitializer", "handler" })
     private User paidBy; // User who paid the bill
 
     @Column(nullable = false)
@@ -52,15 +49,8 @@ public class SharedExpense extends BaseEntity {
 
     private LocalDateTime settledAt;
 
-    @OneToMany(
-        mappedBy = "sharedExpense",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true,
-        fetch = FetchType.EAGER
-    )
-    @JsonIgnoreProperties(
-        { "sharedExpense", "hibernateLazyInitializer", "handler" }
-    )
+    @OneToMany(mappedBy = "sharedExpense", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({ "sharedExpense", "hibernateLazyInitializer", "handler" })
     @Builder.Default
     private Set<SharedExpenseParticipant> participants = new HashSet<>();
 

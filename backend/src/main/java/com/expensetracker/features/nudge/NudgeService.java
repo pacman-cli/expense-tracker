@@ -78,7 +78,7 @@ public class NudgeService {
         return stats;
     }
 
-    public void generateNudges(User user) {
+    public int generateNudges(User user) {
         log.info("Generating nudges for user: {}", user.getId());
 
         int nudgesGenerated = 0;
@@ -139,11 +139,18 @@ public class NudgeService {
             );
         }
 
+        // If no nudges were generated, create a welcome/helpful nudge
+        if (nudgesGenerated == 0) {
+            nudgesGenerated += generateWelcomeNudge(user);
+        }
+
         log.info(
             "Finished generating {} nudges for user: {}",
             nudgesGenerated,
             user.getId()
         );
+        
+        return nudgesGenerated;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -201,6 +208,7 @@ public class NudgeService {
                             : Nudge.Priority.HIGH
                     )
                     .actionUrl("/expenses")
+                    .isActionable(true)
                     .build();
                 nudgeRepository.save(nudge);
                 count++;
@@ -262,6 +270,7 @@ public class NudgeService {
                     )
                     .priority(Nudge.Priority.HIGH)
                     .actionUrl("/dashboard")
+                    .isActionable(true)
                     .build();
                 nudgeRepository.save(nudge);
                 return 1;
@@ -313,6 +322,7 @@ public class NudgeService {
                 )
                 .priority(priority)
                 .actionUrl("/recurring")
+                .isActionable(true)
                 .build();
             nudgeRepository.save(nudge);
             count++;
@@ -365,6 +375,7 @@ public class NudgeService {
                         )
                         .priority(Nudge.Priority.LOW)
                         .actionUrl("/categories")
+                        .isActionable(true)
                         .build();
                     nudgeRepository.save(nudge);
                     count++;
@@ -436,10 +447,66 @@ public class NudgeService {
                 )
                 .priority(Nudge.Priority.LOW)
                 .actionUrl("/dashboard")
+                .isActionable(true)
                 .build();
             nudgeRepository.save(nudge);
             return 1;
         }
         return 0;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private int generateWelcomeNudge(User user) {
+        log.debug("Generating welcome nudge for user: {}", user.getId());
+        
+        // Check if user has any expenses
+        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        LocalDate now = LocalDate.now();
+        List<Expense> recentExpenses = expenseRepository.findByUserIdAndDateBetween(
+            user.getId(),
+            lastMonth,
+            now
+        );
+
+        if (recentExpenses.isEmpty()) {
+            // User has no expenses - suggest adding some
+            Nudge nudge = Nudge.builder()
+                .user(user)
+                .type(Nudge.NudgeType.SPENDING_INSIGHT)
+                .title("Welcome to Smart Nudges!")
+                .message(
+                    "Start tracking your expenses to receive personalized financial insights and alerts. Add your first expense to get started!"
+                )
+                .priority(Nudge.Priority.LOW)
+                .actionUrl("/expenses")
+                .isActionable(true)
+                .build();
+            nudgeRepository.save(nudge);
+            return 1;
+        } else {
+            // User has expenses but didn't meet thresholds - provide encouragement
+            BigDecimal total = recentExpenses
+                .stream()
+                .map(Expense::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            Nudge nudge = Nudge.builder()
+                .user(user)
+                .type(Nudge.NudgeType.SPENDING_INSIGHT)
+                .title("Keep Tracking!")
+                .message(
+                    String.format(
+                        "You've tracked %d expenses totaling ৳%.2f. Continue adding expenses to receive personalized budget alerts and savings tips!",
+                        recentExpenses.size(),
+                        total
+                    )
+                )
+                .priority(Nudge.Priority.LOW)
+                .actionUrl("/dashboard")
+                .isActionable(true)
+                .build();
+            nudgeRepository.save(nudge);
+            return 1;
+        }
     }
 }

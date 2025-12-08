@@ -1,6 +1,5 @@
 package com.expensetracker.features.shared;
 
-import java.math.BigDecimal;
 import java.util.List;
 import lombok.Data;
 

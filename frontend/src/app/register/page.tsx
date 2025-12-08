@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post("/auth/signup", { username, email, password, role: ["user"] });
+      await api.post("/auth/signup", { fullName, email, password });
       toast.success("Account created! Please log in.");
       router.push("/login");
     } catch (error) {
@@ -54,12 +54,12 @@ export default function RegisterPage() {
           <CardContent>
             <form onSubmit={handleRegister} className="space-y-4">
               <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="fullName">Full Name</Label>
               <Input 
-                id="username" 
-                placeholder="johndoe" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="fullName" 
+                placeholder="John Doe" 
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 required
               />
             </div>

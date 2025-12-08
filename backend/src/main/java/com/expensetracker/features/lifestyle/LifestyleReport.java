@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -164,32 +165,32 @@ public class LifestyleReport extends BaseEntity {
     }
 
     public enum SpendingPattern {
-        CONSISTENT,        // Steady spending pattern
-        INCREASING,        // Spending increasing over time
-        DECREASING,        // Spending decreasing over time
-        VOLATILE,          // Highly variable spending
-        SEASONAL,          // Seasonal spending pattern
-        WEEKEND_HEAVY,     // More spending on weekends
-        WEEKDAY_HEAVY      // More spending on weekdays
+        CONSISTENT, // Steady spending pattern
+        INCREASING, // Spending increasing over time
+        DECREASING, // Spending decreasing over time
+        VOLATILE, // Highly variable spending
+        SEASONAL, // Seasonal spending pattern
+        WEEKEND_HEAVY, // More spending on weekends
+        WEEKDAY_HEAVY // More spending on weekdays
     }
 
     public enum LifestyleType {
-        FRUGAL,           // Very low spending, high savings
-        BALANCED,         // Balanced spending and savings
+        FRUGAL, // Very low spending, high savings
+        BALANCED, // Balanced spending and savings
         MODERATE_SPENDER, // Moderate spending habits
-        HIGH_SPENDER,     // High spending, lower savings
-        LUXURY,           // Premium lifestyle spending
-        MINIMALIST,       // Minimal spending philosophy
+        HIGH_SPENDER, // High spending, lower savings
+        LUXURY, // Premium lifestyle spending
+        MINIMALIST, // Minimal spending philosophy
         EXPERIENCE_FOCUSED, // Spends on experiences
-        INVESTMENT_FOCUSED  // Focus on investments
+        INVESTMENT_FOCUSED // Focus on investments
     }
 
     public enum FinancialHealthStatus {
-        EXCELLENT,        // >80 score
-        GOOD,            // 60-80 score
-        FAIR,            // 40-60 score
+        EXCELLENT, // >80 score
+        GOOD, // 60-80 score
+        FAIR, // 40-60 score
         NEEDS_ATTENTION, // 20-40 score
-        CRITICAL         // <20 score
+        CRITICAL // <20 score
     }
 
     // Helper method to calculate savings rate
@@ -197,8 +198,8 @@ public class LifestyleReport extends BaseEntity {
         if (totalIncome != null && totalIncome.compareTo(BigDecimal.ZERO) > 0) {
             if (netSavings != null) {
                 savingsRate = netSavings
-                    .multiply(BigDecimal.valueOf(100))
-                    .divide(totalIncome, 2, BigDecimal.ROUND_HALF_UP);
+                        .multiply(BigDecimal.valueOf(100))
+                        .divide(totalIncome, 2, java.math.RoundingMode.HALF_UP);
             }
         }
     }

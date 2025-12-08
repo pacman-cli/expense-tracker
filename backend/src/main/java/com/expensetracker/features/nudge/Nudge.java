@@ -28,7 +28,7 @@ public class Nudge {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "nudge_type", nullable = false)
+    @Column(name = "nudge_type", nullable = false, length = 50)
     private NudgeType type;
 
     @Column(nullable = false)
@@ -44,6 +44,10 @@ public class Nudge {
     @Column(nullable = false)
     @Builder.Default
     private Boolean isRead = false;
+
+    @Column(name = "is_actionable", nullable = false)
+    @Builder.Default
+    private Boolean isActionable = true;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

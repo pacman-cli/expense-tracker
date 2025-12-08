@@ -2,7 +2,6 @@ package com.expensetracker.features.tax;
 
 import com.expensetracker.entity.User;
 import com.expensetracker.exception.BusinessException;
-import com.expensetracker.features.category.Category;
 import com.expensetracker.features.expense.Expense;
 import com.expensetracker.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,7 +24,6 @@ public class TaxExportService {
     private final TaxExportRepository taxExportRepository;
     private final UserRepository userRepository;
     private final com.expensetracker.features.expense.ExpenseRepository expenseRepository;
-    private final com.expensetracker.features.category.CategoryRepository categoryRepository;
     private final ObjectMapper objectMapper;
 
     // Categories typically considered tax-deductible (can be customized per
@@ -118,6 +115,7 @@ public class TaxExportService {
             export.setIncludedCategories(objectMapper.writeValueAsString(request.getIncludedCategories()));
         } catch (JsonProcessingException e) {
             log.error("Error converting data to JSON", e);
+            throw new BusinessException("Failed to process export data: " + e.getMessage());
         }
 
         // Generate the actual file data (stored in memory for now)

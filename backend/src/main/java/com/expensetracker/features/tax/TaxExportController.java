@@ -1,8 +1,6 @@
 package com.expensetracker.features.tax;
 
-import com.expensetracker.entity.User;
 import com.expensetracker.exception.BusinessException;
-import com.expensetracker.repository.UserRepository;
 import com.expensetracker.service.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +21,6 @@ import java.util.Map;
 public class TaxExportController {
 
     private final TaxExportService taxExportService;
-    private final UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<?> getAllTaxExports(@AuthenticationPrincipal UserDetailsImpl userDetails) {

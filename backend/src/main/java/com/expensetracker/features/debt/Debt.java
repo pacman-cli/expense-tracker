@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

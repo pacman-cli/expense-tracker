@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -45,6 +46,7 @@ public class RecurringExpense extends BaseEntity {
     @Column(nullable = false)
     private LocalDate nextDueDate;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
 

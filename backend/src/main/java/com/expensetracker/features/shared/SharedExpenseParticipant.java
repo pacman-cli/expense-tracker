@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,16 +22,12 @@ public class SharedExpenseParticipant extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shared_expense_id", nullable = false)
-    @JsonIgnoreProperties(
-        { "participants", "expense", "hibernateLazyInitializer", "handler" }
-    )
+    @JsonIgnoreProperties({ "participants", "expense", "hibernateLazyInitializer", "handler" })
     private SharedExpense sharedExpense;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties(
-        { "password", "refreshToken", "hibernateLazyInitializer", "handler" }
-    )
+    @JsonIgnoreProperties({ "password", "refreshToken", "hibernateLazyInitializer", "handler" })
     private User user; // Null if external/non-user participant
 
     @Column(length = 255)

@@ -15,12 +15,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "expenses")
-@EqualsAndHashCode(callSuper = false)
 public class Expense extends BaseEntity {
 
     @Column(nullable = false)
