@@ -1,0 +1,9 @@
+.git
+.idea
+.vscode
+*.md
+backend/target
+frontend/.next
+frontend/node_modules
+nginx/.dockerignore
+nginx/Dockerfile
