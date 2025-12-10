@@ -40,9 +40,10 @@ export default function LoginPage() {
       
       toast.success("Welcome back!");
       router.push("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed", error);
-      toast.error("Invalid credentials. Please try again.");
+      const message = error.response?.data?.message || "Login failed. Please check your connection.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
