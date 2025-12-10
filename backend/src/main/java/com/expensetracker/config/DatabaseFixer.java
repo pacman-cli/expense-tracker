@@ -72,30 +72,30 @@ public class DatabaseFixer implements CommandLineRunner {
                             processing_notes VARCHAR(1000),
                             created_at DATETIME(6),
                             updated_at DATETIME(6),
-                            FOREIGN KEY (user_id) REFERENCES users(id)
+                            CONSTRAINT fk_tax_exports_user FOREIGN KEY (user_id) REFERENCES users(id)
                         );
                     """;
 
             jdbcTemplate.execute(sql);
             log.info("Database schema check completed. 'tax_exports' table verified.");
-            
+
             // Fix nudges table schema issues
             try {
                 // Check if is_actionable column exists
                 String checkColumnSql = """
-                    SELECT COUNT(*) FROM information_schema.COLUMNS 
-                    WHERE TABLE_SCHEMA = DATABASE() 
-                    AND TABLE_NAME = 'nudges' 
-                    AND COLUMN_NAME = 'is_actionable'
-                """;
+                            SELECT COUNT(*) FROM information_schema.COLUMNS
+                            WHERE TABLE_SCHEMA = DATABASE()
+                            AND TABLE_NAME = 'nudges'
+                            AND COLUMN_NAME = 'is_actionable'
+                        """;
                 Integer count = jdbcTemplate.queryForObject(checkColumnSql, Integer.class);
-                
+
                 if (count == null || count == 0) {
                     // Column doesn't exist, add it
                     jdbcTemplate.execute("""
-                        ALTER TABLE nudges 
-                        ADD COLUMN is_actionable BOOLEAN NOT NULL DEFAULT TRUE
-                    """);
+                                ALTER TABLE nudges
+                                ADD COLUMN is_actionable BOOLEAN NOT NULL DEFAULT TRUE
+                            """);
                     log.info("Added is_actionable column to nudges table.");
                 } else {
                     log.debug("is_actionable column already exists in nudges table.");
@@ -103,13 +103,13 @@ public class DatabaseFixer implements CommandLineRunner {
             } catch (Exception e) {
                 log.warn("Error checking/adding is_actionable column: {}", e.getMessage());
             }
-            
+
             try {
                 // Fix nudge_type column size if it's too small
                 jdbcTemplate.execute("""
-                    ALTER TABLE nudges 
-                    MODIFY COLUMN nudge_type VARCHAR(50) NOT NULL
-                """);
+                            ALTER TABLE nudges
+                            MODIFY COLUMN nudge_type VARCHAR(50) NOT NULL
+                        """);
                 log.info("Updated nudge_type column size in nudges table.");
             } catch (Exception e) {
                 log.debug("nudge_type column update: {}", e.getMessage());
