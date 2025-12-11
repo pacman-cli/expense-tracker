@@ -133,7 +133,12 @@ const sidebarItems = [
     },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+    className?: string;
+    onNavigate?: () => void;
+}
+
+export function Sidebar({ className, onNavigate }: SidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
 
@@ -169,6 +174,7 @@ export function Sidebar() {
                     <Link
                         key={`${item.category}-${index}`}
                         href={item.href}
+                        onClick={onNavigate}
                         className={cn(
                             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all relative group",
                             isActive
@@ -203,7 +209,7 @@ export function Sidebar() {
     );
 
     return (
-        <div className="flex h-screen w-64 flex-col border-r border-border bg-card/50 backdrop-blur-xl">
+        <div className={cn("flex h-screen w-64 flex-col border-r border-border bg-card/50 backdrop-blur-xl", className)}>
             <div className="flex h-16 items-center border-b border-border px-6">
                 <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20">
                     <Wallet className="h-5 w-5 text-indigo-400" />

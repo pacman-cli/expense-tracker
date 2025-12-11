@@ -3,9 +3,10 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { LogOut } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 export default function DashboardLayout({
     children,
@@ -38,25 +39,49 @@ export default function DashboardLayout({
         };
     }, []);
 
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
+
     return (
         <div
             className="flex min-h-screen bg-background"
             suppressHydrationWarning
         >
-            <Sidebar />
-            <main className="flex-1 overflow-y-auto" suppressHydrationWarning>
-                <div className="sticky top-0 z-10 flex justify-end p-4 bg-background/80 backdrop-blur-sm border-b border-border">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground hover:text-destructive"
-                        onClick={handleLogout}
-                    >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Logout
-                    </Button>
+            {/* Desktop Sidebar */}
+            <div className="hidden md:flex fixed inset-y-0 z-50 w-64 flex-col">
+                <Sidebar />
+            </div>
+
+            {/* Mobile Sidebar */}
+            <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+                <SheetContent side="left" className="p-0 border-none w-64 bg-transparent">
+                    <Sidebar onNavigate={() => setIsMobileOpen(false)} />
+                </SheetContent>
+            </Sheet>
+
+            <main className="flex-1 flex flex-col min-h-screen md:pl-64 transition-all duration-300 ease-in-out" suppressHydrationWarning>
+                <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border">
+                    <div className="flex items-center gap-2 md:hidden">
+                        <Button variant="ghost" size="icon" onClick={() => setIsMobileOpen(true)}>
+                            <Menu className="h-5 w-5" />
+                        </Button>
+                        <span className="font-bold text-lg bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                            TakaTrack
+                        </span>
+                    </div>
+
+                    <div className="flex-1 flex justify-end">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground hover:text-destructive"
+                            onClick={handleLogout}
+                        >
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span className="hidden sm:inline">Logout</span>
+                        </Button>
+                    </div>
                 </div>
-                <div className="p-8">{children}</div>
+                <div className="flex-1 overflow-y-auto p-4 md:p-8">{children}</div>
             </main>
             <FloatingActionButton />
         </div>
