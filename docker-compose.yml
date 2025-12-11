@@ -63,12 +63,24 @@ services:
     container_name: nginx
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - frontend
       - backend
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     networks:
       - app-network
     restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email puspo@puspo.online -d takatrack.puspo.online -d www.takatrack.puspo.online --agree-tos
 
 volumes:
   db_data:
