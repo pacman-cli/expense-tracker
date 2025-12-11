@@ -19,5 +19,5 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
-# ENTRYPOINT ["java", "-Xms512m", "-Xmx4096m", "-jar", "/app/app.jar"] --> to use max memory
+# ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java", "-Xms512m", "-Xmx4096m", "-jar", "/app/app.jar"]

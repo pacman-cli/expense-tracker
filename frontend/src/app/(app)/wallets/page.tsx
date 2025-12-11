@@ -64,12 +64,21 @@ interface WalletType {
     currency: string;
 }
 
+import AddMoneyDialog from "./_components/AddMoneyDialog";
+import SendMoneyDialog from "./_components/SendMoneyDialog";
+
 export default function WalletsPage() {
     const [wallets, setWallets] = useState<WalletType[]>([]);
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [balanceVisible, setBalanceVisible] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    
+    // Action Dialog State
+    const [selectedWalletId, setSelectedWalletId] = useState<number | undefined>(undefined);
+    const [selectedWalletName, setSelectedWalletName] = useState<string | undefined>(undefined);
+    const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
+    const [isSendMoneyOpen, setIsSendMoneyOpen] = useState(false);
 
     // Form state
     const [name, setName] = useState("");
@@ -565,101 +574,80 @@ export default function WalletsPage() {
                             </div>
                         </CardHeader>
                         <CardContent className="pb-6">
-                            <div className="grid md:grid-cols-2 gap-8">
-                                <div className="flex items-center justify-center">
-                                    <ResponsiveContainer
-                                        width="100%"
-                                        height={280}
-                                    >
-                                        <PieChart>
-                                            <Pie
-                                                data={pieData}
-                                                cx="50%"
-                                                cy="50%"
-                                                labelLine={false}
-                                                label={({ name, percent }: { name?: string | number; percent?: number }) =>
-                                                    `${name ?? ""} (${((percent || 0) * 100).toFixed(0)}%)`
-                                                }
-                                                outerRadius={100}
-                                                fill="#8884d8"
-                                                dataKey="value"
-                                            >
-                                                {pieData.map((entry, index) => (
-                                                    <Cell
-                                                        key={`cell-${index}`}
-                                                        fill={
-                                                            COLORS[
-                                                                index %
-                                                                    COLORS.length
-                                                            ]
-                                                        }
-                                                    />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip
-                                                contentStyle={{
-                                                    backgroundColor:
-                                                        "rgba(0,0,0,0.9)",
-                                                    border: "none",
-                                                    borderRadius: "12px",
-                                                    color: "#fff",
-                                                    padding: "12px",
-                                                }}
-                                                formatter={(value: number) =>
-                                                    `৳${value.toLocaleString()}`
-                                                }
-                                            />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                </div>
-                                <div className="flex flex-col justify-center space-y-3">
-                                    <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-2">
-                                        Breakdown
-                                    </h4>
-                                    {wallets.map((wallet, index) => {
-                                        const percentage = (
-                                            (wallet.balance / totalBalance) *
-                                            100
-                                        ).toFixed(1);
-                                        return (
-                                            <div
-                                                key={wallet.id}
-                                                className="flex items-center gap-3 p-3 rounded-xl bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all"
-                                            >
-                                                <div
-                                                    className="h-4 w-4 rounded-full flex-shrink-0"
-                                                    style={{
-                                                        backgroundColor:
-                                                            COLORS[
-                                                                index %
-                                                                    COLORS.length
-                                                            ],
-                                                    }}
+                            {pieData.filter(d => d.value > 0).length > 0 ? (
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <div className="flex items-center justify-center">
+                                        <ResponsiveContainer
+                                            width="100%"
+                                            height={280}
+                                        >
+                                            <PieChart>
+                                                <Pie
+                                                    data={pieData.filter(d => d.value > 0)}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    labelLine={false}
+                                                    label={({ name, percent }: { name?: string | number; percent?: number }) =>
+                                                        `${name ?? ""} (${((percent || 0) * 100).toFixed(0)}%)`
+                                                    }
+                                                    outerRadius={100}
+                                                    fill="#8884d8"
+                                                    dataKey="value"
+                                                >
+                                                    {pieData.filter(d => d.value > 0).map((entry, index) => (
+                                                        <Cell
+                                                            key={`cell-${index}`}
+                                                            fill={
+                                                                COLORS[
+                                                                    index %
+                                                                        COLORS.length
+                                                                ]
+                                                            }
+                                                        />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip 
+                                                    formatter={(value: number) => `৳${value.toFixed(2)}`}
+                                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                                 />
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium truncate">
-                                                        {wallet.name}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground capitalize">
-                                                        {wallet.type
-                                                            .replace("_", " ")
-                                                            .toLowerCase()}
-                                                    </p>
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                    <div className="flex flex-col justify-center gap-4">
+                                        {pieData.filter(d => d.value > 0).map((entry, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div
+                                                        className="w-3 h-3 rounded-full"
+                                                        style={{
+                                                            backgroundColor:
+                                                                COLORS[
+                                                                    index %
+                                                                        COLORS.length
+                                                                ],
+                                                        }}
+                                                    />
+                                                    <span className="font-medium">
+                                                        {entry.name}
+                                                    </span>
                                                 </div>
-                                                <div className="text-right">
-                                                    <p className="text-sm font-bold">
-                                                        ৳
-                                                        {wallet.balance.toLocaleString()}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {percentage}%
-                                                    </p>
-                                                </div>
+                                                <span className="font-bold text-muted-foreground">
+                                                    ৳{entry.value.toFixed(2)}
+                                                </span>
                                             </div>
-                                        );
-                                    })}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-10 text-center">
+                                    <PieChartIcon className="w-16 h-16 text-muted-foreground/20 mb-4" />
+                                    <p className="text-muted-foreground font-medium">No funds distribution to show</p>
+                                    <p className="text-xs text-muted-foreground/60 mt-1">Add funds to your wallets to see the chart</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -829,6 +817,12 @@ export default function WalletsPage() {
                                                         variant="ghost"
                                                         size="sm"
                                                         className={`flex-1 ${config.iconColor} hover:${config.iconBg} rounded-lg transition-all hover:scale-105`}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedWalletId(wallet.id);
+                                                            setSelectedWalletName(wallet.name);
+                                                            setIsAddMoneyOpen(true);
+                                                        }}
                                                     >
                                                         <ArrowUpRight className="h-4 w-4 mr-1" />
                                                         Add
@@ -837,6 +831,12 @@ export default function WalletsPage() {
                                                         variant="ghost"
                                                         size="sm"
                                                         className={`flex-1 ${config.iconColor} hover:${config.iconBg} rounded-lg transition-all hover:scale-105`}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedWalletId(wallet.id);
+                                                            setSelectedWalletName(wallet.name);
+                                                            setIsSendMoneyOpen(true);
+                                                        }}
                                                     >
                                                         <ArrowDownRight className="h-4 w-4 mr-1" />
                                                         Send
@@ -869,6 +869,22 @@ export default function WalletsPage() {
                     </AnimatePresence>
                 </div>
             </motion.div>
+
+            <AddMoneyDialog 
+                open={isAddMoneyOpen} 
+                onOpenChange={setIsAddMoneyOpen}
+                walletId={selectedWalletId}
+                walletName={selectedWalletName}
+                onSuccess={() => fetchWallets(true)}
+            />
+
+            <SendMoneyDialog
+                open={isSendMoneyOpen}
+                onOpenChange={setIsSendMoneyOpen}
+                walletId={selectedWalletId}
+                walletName={selectedWalletName}
+                onSuccess={() => fetchWallets(true)}
+            />
         </div>
     );
 }

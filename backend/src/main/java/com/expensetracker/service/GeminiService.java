@@ -111,7 +111,7 @@ public class GeminiService {
     // Private helper methods
 
     private String callGeminiAPI(String prompt) {
-        String endpoint = "/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+        String endpoint = "/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
 
         Map<String, Object> request = new HashMap<>();
         Map<String, Object> contentObj = new HashMap<>();

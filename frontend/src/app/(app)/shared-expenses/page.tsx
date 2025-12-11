@@ -377,9 +377,9 @@ export default function SharedExpensesPage() {
                     userId: p.userId || null,
                     externalName: p.externalName || null,
                     externalEmail: p.externalEmail || null,
-                    shareAmount: p.shareAmount || null,
-                    sharePercentage: p.sharePercentage || null,
-                    shareUnits: p.shareUnits || null,
+                    shareAmount: p.shareAmount ? parseFloat(p.shareAmount.toString()) : null,
+                    sharePercentage: p.sharePercentage ? parseFloat(p.sharePercentage.toString()) : null,
+                    shareUnits: p.shareUnits ? parseInt(p.shareUnits.toString()) : null,
                 })),
             });
             toast.success("Shared expense created successfully!");
