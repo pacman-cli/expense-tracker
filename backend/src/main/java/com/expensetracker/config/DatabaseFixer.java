@@ -117,5 +117,74 @@ public class DatabaseFixer implements CommandLineRunner {
         } catch (Exception e) {
             log.error("Error checking/creating database schema: {}", e.getMessage());
         }
+
+        try {
+            // Create lifestyle_reports table if not exists (Robust Fix)
+            String lifestyleSql = """
+                        CREATE TABLE IF NOT EXISTS lifestyle_reports (
+                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            user_id BIGINT NOT NULL,
+                            report_start_date DATE NOT NULL,
+                            report_end_date DATE NOT NULL,
+                            report_period VARCHAR(255) NOT NULL,
+                            title VARCHAR(500) NOT NULL,
+                            summary TEXT,
+                            total_income DECIMAL(19,2),
+                            total_expenses DECIMAL(19,2),
+                            net_savings DECIMAL(19,2),
+                            savings_rate DECIMAL(19,2),
+                            category_breakdown TEXT,
+                            top_spending_category VARCHAR(500),
+                            top_spending_amount DECIMAL(19,2),
+                            second_top_category VARCHAR(500),
+                            second_top_amount DECIMAL(19,2),
+                            third_top_category VARCHAR(500),
+                            third_top_amount DECIMAL(19,2),
+                            spending_pattern VARCHAR(255),
+                            spending_trends TEXT,
+                            average_daily_expenses INT,
+                            total_transactions INT,
+                            lifestyle_type VARCHAR(255),
+                            lifestyle_insights TEXT,
+                            recommendations TEXT,
+                            comparison_to_previous_period DECIMAL(19,2),
+                            comparison_to_average DECIMAL(19,2),
+                            benchmark_comparison TEXT,
+                            most_active_day VARCHAR(500),
+                            most_active_time VARCHAR(500),
+                            impulse_purchases INT,
+                            subscription_count INT,
+                            subscription_cost DECIMAL(19,2),
+                            budget_goals_achieved INT,
+                            budget_goals_total INT,
+                            savings_goals_achieved INT,
+                            savings_goals_total INT,
+                            achievements TEXT,
+                            total_debt DECIMAL(19,2),
+                            debt_paid DECIMAL(19,2),
+                            debt_accounts INT,
+                            shared_expenses_total DECIMAL(19,2),
+                            amount_owed_to_you DECIMAL(19,2),
+                            amount_you_owe DECIMAL(19,2),
+                            wallet_distribution TEXT,
+                            financial_health_score INT,
+                            financial_health_status VARCHAR(255),
+                            health_factors TEXT,
+                            is_viewed BOOLEAN NOT NULL DEFAULT FALSE,
+                            viewed_at DATE,
+                            is_shared BOOLEAN NOT NULL DEFAULT FALSE,
+                            share_url VARCHAR(500),
+                            visualization_data TEXT,
+                            report_version VARCHAR(100),
+                            created_at DATETIME(6),
+                            updated_at DATETIME(6),
+                            CONSTRAINT fk_lifestyle_reports_user FOREIGN KEY (user_id) REFERENCES users(id)
+                        );
+                    """;
+            jdbcTemplate.execute(lifestyleSql);
+            log.info("Database schema check completed. 'lifestyle_reports' table verified.");
+        } catch (Exception e) {
+            log.error("Error creating lifestyle_reports table: {}", e.getMessage());
+        }
     }
 }

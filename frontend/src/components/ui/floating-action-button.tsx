@@ -371,14 +371,14 @@ export function FloatingActionButton() {
         )}
       </AnimatePresence>
 
-      <div className="fixed bottom-8 right-8 z-50">
+      <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50">
         <AnimatePresence>
           {isOpen && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute bottom-24 right-0 flex flex-col gap-4"
+              className="absolute bottom-20 md:bottom-24 right-0 flex flex-col gap-3 md:gap-4"
             >
               {actions.map((action, index) => (
                 <motion.div
@@ -411,16 +411,16 @@ export function FloatingActionButton() {
                     <motion.div
                       initial={{ width: 0, opacity: 0 }}
                       animate={{ width: "auto", opacity: 1 }}
-                      className="glass-card border-none px-4 py-2 rounded-full overflow-hidden"
+                      className="glass-card border-none px-3 py-1.5 md:px-4 md:py-2 rounded-full overflow-hidden"
                     >
-                      <span className="text-sm font-semibold text-foreground whitespace-nowrap">
+                      <span className="text-xs md:text-sm font-semibold text-foreground whitespace-nowrap">
                         {action.label}
                       </span>
                     </motion.div>
 
                     {/* Icon button */}
-                    <div className={`relative p-4 rounded-full bg-gradient-to-br ${action.gradient} shadow-lg ${action.shadowColor} group-hover:shadow-xl transition-all`}>
-                      <action.icon className="h-6 w-6 text-white relative z-10" />
+                    <div className={`relative p-3 md:p-4 rounded-full bg-gradient-to-br ${action.gradient} shadow-lg ${action.shadowColor} group-hover:shadow-xl transition-all`}>
+                      <action.icon className="h-5 w-5 md:h-6 md:w-6 text-white relative z-10" />
                       
                       {/* Rotating gradient border effect */}
                       <motion.div
@@ -478,7 +478,7 @@ export function FloatingActionButton() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(!isOpen)}
-            className="relative w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-500 shadow-2xl flex items-center justify-center overflow-hidden group"
+            className="relative w-14 h-14 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-500 shadow-2xl flex items-center justify-center overflow-hidden group"
             style={{
               boxShadow: isOpen 
                 ? "0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(14, 165, 233, 0.4)"
@@ -510,8 +510,8 @@ export function FloatingActionButton() {
                 ease: "easeInOut",
               }}
             >
-              <Sparkles className="absolute top-2 right-2 h-4 w-4 text-white/80" />
-              <Sparkles className="absolute bottom-3 left-3 h-3 w-3 text-white/60" />
+              <Sparkles className="absolute top-2 right-2 h-3 w-3 md:h-4 md:w-4 text-white/80" />
+              <Sparkles className="absolute bottom-3 left-3 h-2 w-2 md:h-3 md:w-3 text-white/60" />
             </motion.div>
 
             {/* Icon */}
@@ -520,7 +520,7 @@ export function FloatingActionButton() {
               transition={{ type: "spring", stiffness: 200, damping: 15 }}
               className="relative z-10"
             >
-              <Plus className="h-8 w-8 text-white drop-shadow-lg" strokeWidth={3} />
+              <Plus className="h-6 w-6 md:h-8 md:w-8 text-white drop-shadow-lg" strokeWidth={3} />
             </motion.div>
 
             {/* Ripple effect on click */}

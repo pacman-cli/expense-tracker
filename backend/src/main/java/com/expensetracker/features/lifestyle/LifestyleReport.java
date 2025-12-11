@@ -37,7 +37,7 @@ public class LifestyleReport extends BaseEntity {
     @Column(nullable = false, length = 500)
     private String title; // e.g., "Your December 2024 Lifestyle Report"
 
-    @Column(length = 5000)
+    @Column(columnDefinition = "TEXT")
     private String summary; // Executive summary of spending habits
 
     // Financial Metrics
@@ -47,7 +47,7 @@ public class LifestyleReport extends BaseEntity {
     private BigDecimal savingsRate; // Percentage
 
     // Category Breakdown
-    @Column(length = 3000)
+    @Column(columnDefinition = "TEXT")
     private String categoryBreakdown; // JSON: {category: amount, percentage}
 
     // Top Categories
@@ -67,7 +67,7 @@ public class LifestyleReport extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private SpendingPattern spendingPattern;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String spendingTrends; // JSON: weekly/monthly trends
 
     private Integer averageDailyExpenses;
@@ -77,17 +77,17 @@ public class LifestyleReport extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private LifestyleType lifestyleType;
 
-    @Column(length = 2000)
+    @Column(columnDefinition = "TEXT")
     private String lifestyleInsights; // AI-generated personalized insights
 
-    @Column(length = 2000)
+    @Column(columnDefinition = "TEXT")
     private String recommendations; // Actionable recommendations
 
     // Comparisons
     private BigDecimal comparisonToPreviousPeriod; // Percentage change
     private BigDecimal comparisonToAverage; // vs. user's average
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String benchmarkComparison; // Compare to similar users (anonymized)
 
     // Habits & Behaviors
@@ -110,7 +110,7 @@ public class LifestyleReport extends BaseEntity {
     private Integer savingsGoalsAchieved;
     private Integer savingsGoalsTotal;
 
-    @Column(length = 2000)
+    @Column(columnDefinition = "TEXT")
     private String achievements; // JSON: list of achievements
 
     // Debt & Loans
@@ -124,7 +124,7 @@ public class LifestyleReport extends BaseEntity {
     private BigDecimal amountYouOwe;
 
     // Wallet Distribution
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String walletDistribution; // JSON: wallet-wise spending
 
     // Financial Health
@@ -133,7 +133,7 @@ public class LifestyleReport extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private FinancialHealthStatus financialHealthStatus;
 
-    @Column(length = 2000)
+    @Column(columnDefinition = "TEXT")
     private String healthFactors; // JSON: factors affecting health score
 
     // Report Metadata
@@ -150,7 +150,7 @@ public class LifestyleReport extends BaseEntity {
     @Column(length = 500)
     private String shareUrl; // If user shares the report
 
-    @Column(length = 3000)
+    @Column(columnDefinition = "TEXT")
     private String visualizationData; // JSON: data for charts and graphs
 
     @Column(length = 100)

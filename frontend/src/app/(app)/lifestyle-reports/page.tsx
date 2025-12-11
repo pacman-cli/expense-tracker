@@ -29,7 +29,12 @@ import {
   Wallet,
   ChevronRight,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
+// ... Interfaces (keep existing) ...
 interface LifestyleReport {
   id: number;
   title: string;
@@ -68,7 +73,7 @@ export default function LifestyleReportsPage() {
   >("monthly");
   const [, setSelectedReport] = useState<LifestyleReport | null>(null);
 
-  // Mock data
+  // Mock data (Keep existing)
   const reports: LifestyleReport[] = [
     {
       id: 1,
@@ -165,35 +170,23 @@ export default function LifestyleReportsPage() {
 
   const getHealthColor = (status: string) => {
     switch (status) {
-      case "EXCELLENT":
-        return "text-green-600 bg-green-50";
-      case "GOOD":
-        return "text-blue-600 bg-blue-50";
-      case "FAIR":
-        return "text-yellow-600 bg-yellow-50";
-      case "NEEDS_ATTENTION":
-        return "text-orange-600 bg-orange-50";
-      case "CRITICAL":
-        return "text-red-600 bg-red-50";
-      default:
-        return "text-gray-600 bg-gray-50";
+      case "EXCELLENT": return "bg-green-100 text-green-800 border-green-200";
+      case "GOOD": return "bg-blue-100 text-blue-800 border-blue-200";
+      case "FAIR": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "NEEDS_ATTENTION": return "bg-orange-100 text-orange-800 border-orange-200";
+      case "CRITICAL": return "bg-red-100 text-red-800 border-red-200";
+      default: return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getHealthIcon = (status: string) => {
     switch (status) {
-      case "EXCELLENT":
-        return <Award className="w-5 h-5" />;
-      case "GOOD":
-        return <CheckCircle2 className="w-5 h-5" />;
-      case "FAIR":
-        return <Activity className="w-5 h-5" />;
-      case "NEEDS_ATTENTION":
-        return <AlertCircle className="w-5 h-5" />;
-      case "CRITICAL":
-        return <AlertCircle className="w-5 h-5" />;
-      default:
-        return <Activity className="w-5 h-5" />;
+      case "EXCELLENT": return <Award className="w-4 h-4" />;
+      case "GOOD": return <CheckCircle2 className="w-4 h-4" />;
+      case "FAIR": return <Activity className="w-4 h-4" />;
+      case "NEEDS_ATTENTION": return <AlertCircle className="w-4 h-4" />;
+      case "CRITICAL": return <AlertCircle className="w-4 h-4" />;
+      default: return <Activity className="w-4 h-4" />;
     }
   };
 
@@ -209,487 +202,232 @@ export default function LifestyleReportsPage() {
       Healthcare: Heart,
     };
     const Icon = iconMap[name] || ShoppingBag;
-    return <Icon className="w-5 h-5" />;
+    return <Icon className="w-4 h-4" />;
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-pink-50 via-white to-orange-50 p-8">
+    <div className="min-h-screen bg-background p-4 md:p-8 space-y-8 pb-20 md:pb-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center space-y-4"
-        >
-          <div className="flex items-center justify-center gap-3">
-            <div className="relative">
-              <BarChart3 className="w-12 h-12 text-pink-600" />
-              <Sparkles className="w-5 h-5 text-yellow-500 absolute -top-1 -right-1 animate-pulse" />
-            </div>
-            <PieChart className="w-12 h-12 text-orange-600" />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              Lifestyle Reports
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              AI-powered insights into your financial health and spending patterns
+            </p>
           </div>
-          <h1 className="text-5xl font-bold bg-linear-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent">
-            Lifestyle Reports
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Comprehensive insights into your spending habits, financial health,
-            and lifestyle patterns 📊
-          </p>
-        </motion.div>
+          <div className="flex items-center gap-2">
+            {["monthly", "quarterly", "yearly"].map((period) => (
+               <Button
+                  key={period}
+                  variant={selectedPeriod === period ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedPeriod(period as any)}
+                  className="capitalize"
+               >
+                  {period}
+               </Button>
+            ))}
+          </div>
+        </div>
 
         {/* Current Report Highlight */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-linear-to-br from-pink-500 to-orange-500 rounded-3xl p-8 shadow-2xl text-white overflow-hidden relative"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24" />
-
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <p className="text-white/80 text-sm font-medium mb-2">
-                  Latest Report
-                </p>
-                <h2 className="text-3xl font-bold">{latestReport.title}</h2>
-                <p className="text-white/90 mt-2">
-                  {new Date(latestReport.startDate).toLocaleDateString()} -{" "}
-                  {new Date(latestReport.endDate).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                  {getHealthIcon(latestReport.financialHealthStatus)}
-                  <span className="font-semibold">
+        <Card className="border-none bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl overflow-hidden relative">
+           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
+           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24 blur-3xl" />
+           <CardContent className="p-8 relative z-10">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                 <div>
+                    <Badge variant="secondary" className="mb-2 bg-white/20 text-white hover:bg-white/30 border-none">
+                       Latest Report
+                    </Badge>
+                    <h2 className="text-3xl font-bold">{latestReport.title}</h2>
+                    <p className="text-white/80 mt-1">
+                       {new Date(latestReport.startDate).toLocaleDateString()} - {new Date(latestReport.endDate).toLocaleDateString()}
+                    </p>
+                 </div>
+                 <Badge variant="secondary" className="self-start md:self-center px-4 py-2 bg-white/20 text-white backdrop-blur-md border-none gap-2 text-base">
+                    {getHealthIcon(latestReport.financialHealthStatus)}
                     {latestReport.financialHealthStatus}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-5 h-5" />
-                  <p className="text-sm font-medium">Income</p>
-                </div>
-                <p className="text-3xl font-bold">
-                  ${latestReport.totalIncome.toLocaleString()}
-                </p>
+                 </Badge>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingDown className="w-5 h-5" />
-                  <p className="text-sm font-medium">Expenses</p>
-                </div>
-                <p className="text-3xl font-bold">
-                  ${latestReport.totalExpenses.toLocaleString()}
-                </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                 {[
+                    { label: "Income", amount: latestReport.totalIncome, icon: TrendingUp },
+                    { label: "Expenses", amount: latestReport.totalExpenses, icon: TrendingDown },
+                    { label: "Net Savings", amount: latestReport.netSavings, icon: Wallet },
+                    { label: "Savings Rate", amount: `${latestReport.savingsRate.toFixed(1)}%`, icon: Target, isText: true }
+                 ].map((stat, i) => (
+                    <div key={i} className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-colors">
+                       <div className="flex items-center gap-2 mb-2 text-white/80">
+                          <stat.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{stat.label}</span>
+                       </div>
+                       <p className="text-2xl font-bold">
+                          {stat.isText ? stat.amount : `$${stat.amount.toLocaleString()}`}
+                       </p>
+                    </div>
+                 ))}
               </div>
 
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <Wallet className="w-5 h-5" />
-                  <p className="text-sm font-medium">Savings</p>
-                </div>
-                <p className="text-3xl font-bold">
-                  ${latestReport.netSavings.toLocaleString()}
-                </p>
+              <div className="flex flex-wrap gap-3 mt-8">
+                 <Button variant="secondary" className="bg-white text-indigo-600 hover:bg-white/90">
+                    <Eye className="w-4 h-4 mr-2" /> View Details
+                 </Button>
+                 <Button variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10">
+                    <Download className="w-4 h-4 mr-2" /> Download
+                 </Button>
               </div>
+           </CardContent>
+        </Card>
 
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-5 h-5" />
-                  <p className="text-sm font-medium">Savings Rate</p>
-                </div>
-                <p className="text-3xl font-bold">
-                  {latestReport.savingsRate.toFixed(1)}%
-                </p>
-              </div>
-            </div>
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+           {/* Financial Health Score (Left Column) */}
+           <Card className="lg:col-span-1 border-muted/20 shadow-sm">
+              <CardHeader>
+                 <CardTitle>Health Score</CardTitle>
+                 <CardDescription>Overall financial wellness</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center">
+                 <div className="relative w-48 h-48 my-4">
+                    {/* SVG Progress Circle */}
+                    <svg className="w-full h-full transform -rotate-90">
+                       <circle cx="96" cy="96" r="88" fill="none" stroke="currentColor" strokeWidth="12" className="text-muted/20" />
+                       <motion.circle
+                          cx="96" cy="96" r="88" fill="none" stroke="url(#gradient)" strokeWidth="12" strokeLinecap="round"
+                          strokeDasharray={`${2 * Math.PI * 88}`}
+                          initial={{ strokeDashoffset: 2 * Math.PI * 88 }}
+                          animate={{ strokeDashoffset: 2 * Math.PI * 88 * (1 - latestReport.financialHealthScore / 100) }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                       />
+                       <defs>
+                          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                             <stop offset="0%" stopColor="#818cf8" />
+                             <stop offset="100%" stopColor="#c084fc" />
+                          </linearGradient>
+                       </defs>
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                       <span className="text-5xl font-bold tracking-tight">{latestReport.financialHealthScore}</span>
+                       <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">Score</span>
+                    </div>
+                 </div>
+                 
+                 <div className="w-full space-y-4 mt-4">
+                    {[
+                       { label: "Savings Habit", score: 92, color: "bg-green-500" },
+                       { label: "Budget Control", score: 85, color: "bg-blue-500" },
+                       { label: "Debt Management", score: 78, color: "bg-yellow-500" },
+                    ].map((metric) => (
+                       <div key={metric.label} className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                             <span className="font-medium">{metric.label}</span>
+                             <span className="text-muted-foreground">{metric.score}/100</span>
+                          </div>
+                          <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                             <div className={`h-full ${metric.color} rounded-full`} style={{ width: `${metric.score}%` }} />
+                          </div>
+                       </div>
+                    ))}
+                 </div>
+              </CardContent>
+           </Card>
 
-            <div className="flex gap-4 mt-6">
-              <button className="flex-1 px-6 py-3 bg-white text-pink-600 rounded-xl font-semibold hover:bg-white/90 transition-all flex items-center justify-center gap-2">
-                <Eye className="w-5 h-5" />
-                View Full Report
-              </button>
-              <button className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all flex items-center gap-2">
-                <Download className="w-5 h-5" />
-                Download
-              </button>
-              <button className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all flex items-center gap-2">
-                <Share2 className="w-5 h-5" />
-                Share
-              </button>
-            </div>
-          </div>
-        </motion.div>
+           {/* Insights and Achievements (Right Column) */}
+           <div className="lg:col-span-2 space-y-8">
+              {/* Spending Breakdown */}
+              <Card className="border-muted/20 shadow-sm">
+                 <CardHeader>
+                    <CardTitle>Top Expenses</CardTitle>
+                    <CardDescription>Where your money went this month</CardDescription>
+                 </CardHeader>
+                 <CardContent className="space-y-6">
+                    {latestReport.topCategories.map((category) => (
+                       <div key={category.name} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                             <div className="flex items-center gap-3">
+                                <div className="p-2 bg-secondary rounded-lg text-primary">
+                                   {getCategoryIcon(category.name)}
+                                </div>
+                                <div>
+                                   <p className="font-medium">{category.name}</p>
+                                   <p className="text-xs text-muted-foreground">{category.percentage.toFixed(1)}% of total</p>
+                                </div>
+                             </div>
+                             <span className="font-bold">${category.amount.toLocaleString()}</span>
+                          </div>
+                          <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                             <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${category.percentage}%` }}
+                                transition={{ duration: 1 }}
+                                className="h-full bg-primary/80 rounded-full"
+                             />
+                          </div>
+                       </div>
+                    ))}
+                 </CardContent>
+              </Card>
 
-        {/* Financial Health Score */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl p-8 shadow-lg"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">
-                Financial Health Score
-              </h3>
-              <p className="text-gray-600 mt-1">
-                Your overall financial wellness indicator
-              </p>
-            </div>
-            <div
-              className={`px-4 py-2 rounded-full font-semibold ${getHealthColor(
-                latestReport.financialHealthStatus
-              )}`}
-            >
-              {latestReport.financialHealthStatus}
-            </div>
-          </div>
+              {/* Achievements */}
+              <Card className="border-muted/20 shadow-sm bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/20 dark:to-purple-950/20">
+                 <CardHeader>
+                    <div className="flex items-center gap-2">
+                       <Award className="w-5 h-5 text-indigo-500" />
+                       <CardTitle>Achievements</CardTitle>
+                    </div>
+                 </CardHeader>
+                 <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       {latestReport.achievements.map((achievement, idx) => (
+                          <div key={idx} className="flex items-center gap-3 p-3 bg-background/50 backdrop-blur-sm rounded-lg border border-border/50">
+                             <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                                <Star className="w-4 h-4 text-green-600 dark:text-green-400" />
+                             </div>
+                             <span className="text-sm font-medium">{achievement}</span>
+                          </div>
+                       ))}
+                    </div>
+                 </CardContent>
+              </Card>
+           </div>
+        </div>
 
-          <div className="relative">
-            <div className="flex items-center justify-center mb-8">
-              <div className="relative w-48 h-48">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    fill="none"
-                    stroke="#e5e7eb"
-                    strokeWidth="16"
-                  />
-                  <motion.circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    fill="none"
-                    stroke="url(#gradient)"
-                    strokeWidth="16"
-                    strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 88}`}
-                    initial={{ strokeDashoffset: 2 * Math.PI * 88 }}
-                    animate={{
-                      strokeDashoffset:
-                        2 *
-                        Math.PI *
-                        88 *
-                        (1 - latestReport.financialHealthScore / 100),
-                    }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                  />
-                  <defs>
-                    <linearGradient
-                      id="gradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="100%"
-                      y2="100%"
-                    >
-                      <stop offset="0%" stopColor="#ec4899" />
-                      <stop offset="100%" stopColor="#f97316" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center flex-col">
-                  <p className="text-5xl font-bold text-gray-900">
-                    {latestReport.financialHealthScore}
-                  </p>
-                  <p className="text-sm text-gray-600 font-medium">
-                    out of 100
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { label: "Savings Habit", score: 92, color: "green" },
-                { label: "Budget Control", score: 85, color: "blue" },
-                { label: "Debt Management", score: 78, color: "yellow" },
-              ].map((metric) => (
-                <div key={metric.label} className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-semibold text-gray-700">
-                      {metric.label}
-                    </p>
-                    <p className="text-lg font-bold text-gray-900">
-                      {metric.score}
-                    </p>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${metric.score}%` }}
-                      transition={{ duration: 1, delay: 0.3 }}
-                      className={`h-2 rounded-full bg-${metric.color}-500`}
-                    />
-                  </div>
-                </div>
+        {/* Previous Reports List */}
+        <div className="space-y-4">
+           <h3 className="text-xl font-bold tracking-tight">Report History</h3>
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {reports.slice(1).map((report) => (
+                 <Card key={report.id} className="cursor-pointer hover:border-primary/50 transition-all border-muted/20 shadow-sm" onClick={() => setSelectedReport(report)}>
+                    <CardHeader className="pb-3">
+                       <div className="flex justify-between items-start gap-2">
+                          <CardTitle className="text-base font-semibold line-clamp-1">{report.title}</CardTitle>
+                          <Badge variant="outline" className={`${getHealthColor(report.financialHealthStatus)} border text-[10px]`}>
+                             {report.financialHealthStatus}
+                          </Badge>
+                       </div>
+                       <CardDescription>{new Date(report.startDate).toLocaleDateString()}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                       <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                             <p className="text-muted-foreground text-xs">Savings Rate</p>
+                             <p className="font-bold text-green-600 dark:text-green-400">{report.savingsRate}%</p>
+                          </div>
+                          <div>
+                             <p className="text-muted-foreground text-xs">Net Savings</p>
+                             <p className="font-bold text-blue-600 dark:text-blue-400">${report.netSavings.toLocaleString()}</p>
+                          </div>
+                       </div>
+                    </CardContent>
+                 </Card>
               ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Spending Breakdown */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl p-8 shadow-lg"
-        >
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">
-            Top Spending Categories
-          </h3>
-          <div className="space-y-4">
-            {latestReport.topCategories.map((category, index) => (
-              <motion.div
-                key={category.name}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="relative"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-pink-100 rounded-lg">
-                      {getCategoryIcon(category.name)}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {category.name}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {category.percentage.toFixed(1)}% of total
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-xl font-bold text-gray-900">
-                    ${category.amount.toLocaleString()}
-                  </p>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${category.percentage}%` }}
-                    transition={{ duration: 0.8, delay: index * 0.1 }}
-                    className="h-3 rounded-full bg-linear-to-r from-pink-500 to-orange-500"
-                  />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Achievements */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-linear-to-br from-purple-50 to-pink-50 rounded-2xl p-8 shadow-lg border border-purple-200"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <Award className="w-8 h-8 text-purple-600" />
-            <h3 className="text-2xl font-bold text-gray-900">
-              Achievements This Month
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {latestReport.achievements.map((achievement, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow"
-              >
-                <div className="w-10 h-10 bg-linear-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shrink-0">
-                  <Star className="w-5 h-5 text-white" />
-                </div>
-                <p className="font-medium text-gray-900">{achievement}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Historical Reports */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white rounded-2xl p-8 shadow-lg"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">
-              Previous Reports
-            </h3>
-            <div className="flex gap-2">
-              {["monthly", "quarterly", "yearly"].map((period) => (
-                <button
-                  key={period}
-                  onClick={() =>
-                    setSelectedPeriod(
-                      period as "monthly" | "quarterly" | "yearly"
-                    )
-                  }
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                    selectedPeriod === period
-                      ? "bg-linear-to-r from-pink-600 to-orange-600 text-white shadow-md"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {period.charAt(0).toUpperCase() + period.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {reports.slice(1).map((report, index) => (
-              <motion.div
-                key={report.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer group"
-                onClick={() => {
-                  setSelectedReport(report);
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h4 className="text-lg font-bold text-gray-900">
-                        {report.title}
-                      </h4>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${getHealthColor(
-                          report.financialHealthStatus
-                        )}`}
-                      >
-                        {report.financialHealthStatus}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-4 gap-6 mt-4">
-                      <div>
-                        <p className="text-xs text-gray-600 mb-1">
-                          Health Score
-                        </p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {report.financialHealthScore}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600 mb-1">
-                          Savings Rate
-                        </p>
-                        <p className="text-2xl font-bold text-green-600">
-                          {report.savingsRate.toFixed(1)}%
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600 mb-1">
-                          Total Expenses
-                        </p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          ${report.totalExpenses.toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600 mb-1">
-                          Net Savings
-                        </p>
-                        <p className="text-2xl font-bold text-blue-600">
-                          ${report.netSavings.toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-6 h-6 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Insights */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-lg border border-blue-200"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <Zap className="w-8 h-8 text-blue-600" />
-            <h3 className="text-2xl font-bold text-gray-900">
-              AI-Powered Insights
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {(
-              [
-                {
-                  title: "Great Progress!",
-                  description:
-                    "Your savings rate increased by 12% compared to last month. Keep up the excellent work!",
-                  icon: TrendingUp,
-                  color: "green",
-                },
-                {
-                  title: "Spending Pattern",
-                  description:
-                    "You tend to spend more on weekends. Consider setting a weekend budget to maintain consistency.",
-                  icon: Calendar,
-                  color: "blue",
-                },
-                {
-                  title: "Lifestyle Match",
-                  description:
-                    'Your spending habits align with a "Balanced" lifestyle - maintaining good control while enjoying life.',
-                  icon: Activity,
-                  color: "purple",
-                },
-                {
-                  title: "Budget Opportunity",
-                  description:
-                    "Dining expenses are 15% above average. Small reductions could boost savings by $200/month.",
-                  icon: Target,
-                  color: "orange",
-                },
-              ] as Insight[]
-            ).map((insight, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-                className="bg-white rounded-xl p-6 shadow-sm"
-              >
-                <div className="flex items-start gap-4">
-                  <div
-                    className={`p-3 bg-${insight.color}-100 rounded-lg shrink-0`}
-                  >
-                    <insight.icon
-                      className={`w-6 h-6 text-${insight.color}-600`}
-                    />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-2">
-                      {insight.title}
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      {insight.description}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+           </div>
+        </div>
       </div>
     </div>
   );

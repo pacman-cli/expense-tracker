@@ -26,7 +26,7 @@ export default function LandingPage() {
         {/* Floating orbs with parallax */}
         <motion.div
           style={{ y: y1, opacity }}
-          className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-primary/10 blur-[100px]"
+          className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-primary/10 blur-[100px] will-change-transform transform-gpu"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3],
@@ -39,7 +39,7 @@ export default function LandingPage() {
         />
         <motion.div
           style={{ y: y2, opacity }}
-          className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[100px]"
+          className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[100px] will-change-transform transform-gpu"
           animate={{
             scale: [1, 1.3, 1],
             opacity: [0.3, 0.5, 0.3],
