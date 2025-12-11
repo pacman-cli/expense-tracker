@@ -21,14 +21,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleRuntimeException(RuntimeException ex, WebRequest request) {
         log.error("Unexpected runtime exception: {}", ex.getMessage(), ex);
-        return new ResponseEntity<>(new MessageResponse("An unexpected error occurred"),
+        return new ResponseEntity<>(new MessageResponse("Error: " + ex.getMessage()),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request) {
         log.error("Unexpected exception: {}", ex.getMessage(), ex);
-        return new ResponseEntity<>(new MessageResponse("An unexpected error occurred"),
+        return new ResponseEntity<>(new MessageResponse("Error: " + ex.getMessage()),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
