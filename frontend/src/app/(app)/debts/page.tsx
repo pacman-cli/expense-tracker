@@ -305,22 +305,22 @@ export default function DebtsPage() {
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center space-y-4"
+          className="text-center space-y-2 md:space-y-4"
         >
           <div className="flex items-center justify-center gap-3">
-            <PiggyBank className="w-12 h-12 text-emerald-600" />
-            <CreditCard className="w-12 h-12 text-teal-600" />
+            <PiggyBank className="w-10 h-10 md:w-12 md:h-12 text-emerald-600" />
+            <CreditCard className="w-10 h-10 md:w-12 md:h-12 text-teal-600" />
           </div>
-          <h1 className="text-5xl font-bold bg-linear-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-5xl font-bold bg-linear-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
             Debt & Loan Ledger
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
             Track what you owe and what others owe you. Stay on top of all your
             debts and loans 💰
           </p>

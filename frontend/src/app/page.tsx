@@ -214,10 +214,15 @@ export default function LandingPage() {
                   delay: 2,
                 }}
               >
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex justify-between items-start mb-4">
                   <div className="p-3 rounded-xl bg-blue-500/20 text-blue-400">
                     <BarChart3 className="h-6 w-6" />
                   </div>
+                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-500/10 text-blue-400">Last 7 Days</span>
+                </div>
+                <div className="space-y-1 mb-4">
+                  <p className="text-sm text-muted-foreground">Spending Analysis</p>
+                  <h3 className="text-2xl font-bold">৳12,450</h3>
                 </div>
                 <div className="flex items-end gap-2 h-24">
                   {[40, 70, 45, 90, 60, 80, 50].map((h, i) => (
@@ -316,7 +321,7 @@ export default function LandingPage() {
 
         {/* CTA Section */}
         <section className="container mx-auto px-6 py-24">
-          <div className="relative rounded-3xl overflow-hidden bg-primary px-6 py-16 text-center lg:px-12 lg:py-24">
+          <div className="relative rounded-3xl overflow-hidden bg-slate-900 border border-white/10 px-6 py-16 text-center lg:px-12 lg:py-24">
             <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             

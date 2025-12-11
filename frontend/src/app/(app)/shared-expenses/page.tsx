@@ -465,25 +465,25 @@ export default function SharedExpensesPage() {
     }
 
     return (
-        <div className="min-h-screen p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <div className="min-h-screen p-4 md:p-8">
+            <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center space-y-4"
+                    className="text-center space-y-2 md:space-y-4"
                 >
                     <div className="flex items-center justify-center gap-3">
                         <div className="relative">
-                            <Users className="w-12 h-12 text-indigo-600" />
-                            <Sparkles className="w-5 h-5 text-yellow-500 absolute -top-1 -right-1 animate-pulse" />
+                            <Users className="w-10 h-10 md:w-12 md:h-12 text-indigo-600" />
+                            <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-500 absolute -top-1 -right-1 animate-pulse" />
                         </div>
-                        <Split className="w-12 h-12 text-purple-600" />
+                        <Split className="w-10 h-10 md:w-12 md:h-12 text-purple-600" />
                     </div>
-                    <h1 className="text-5xl font-bold bg-linear-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    <h1 className="text-3xl md:text-5xl font-bold bg-linear-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                         Shared Expenses
                     </h1>
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                    <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
                         Split bills fairly, track who owes what, and settle up
                         with friends easily 🤝
                     </p>

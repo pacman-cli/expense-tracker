@@ -473,10 +473,20 @@ public class SharedExpenseService {
                                 BigDecimal equalShare = totalAmount.divide(
                                                 BigDecimal.valueOf(participantCount),
                                                 2,
-                                                RoundingMode.HALF_UP);
-                                for (SharedExpenseParticipantDTO pDto : dto.getParticipants()) {
-                                        participants.add(
-                                                        createParticipant(pDto, equalShare, sharedExpense));
+                                                RoundingMode.DOWN);
+
+                                for (int i = 0; i < dto.getParticipants().size(); i++) {
+                                        SharedExpenseParticipantDTO pDto = dto.getParticipants().get(i);
+                                        BigDecimal share = equalShare;
+
+                                        // Add remainder to the first participant to ensure total matches exactly
+                                        if (i == 0) {
+                                                BigDecimal remainder = totalAmount.subtract(equalShare
+                                                                .multiply(BigDecimal.valueOf(participantCount)));
+                                                share = share.add(remainder);
+                                        }
+
+                                        participants.add(createParticipant(pDto, share, sharedExpense));
                                 }
                                 break;
                         case PERCENTAGE:

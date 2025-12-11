@@ -18,7 +18,7 @@ export default function DashboardLayout({
     const handleLogout = () => {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        router.push("/login");
+        router.push("/");
     };
 
     // Suppress hydration warnings caused by browser extensions
