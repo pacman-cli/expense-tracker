@@ -7,8 +7,8 @@ import "./globals.css";
 const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Antigravity | AI Finance",
-  description: "Next-gen financial analytics powered by AI",
+  title: "TakaTrack | Smart Finance",
+  description: "Your AI-powered financial wellness companion",
 };
 
 export default function RootLayout({

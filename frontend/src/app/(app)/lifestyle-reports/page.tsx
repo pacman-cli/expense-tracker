@@ -148,56 +148,65 @@ export default function LifestyleReportsPage() {
       <head>
         <title>Lifestyle Report - ${report.title}</title>
         <style>
-          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
-          .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #eee; }
-          .title { font-size: 28px; font-weight: bold; color: #2c3e50; margin: 0; }
-          .subtitle { font-size: 16px; color: #7f8c8d; margin-top: 5px; }
-          .meta { font-size: 14px; color: #95a5a6; margin-top: 10px; }
+          @page { size: A4; margin: 20mm; }
+          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
+          .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #6366f1; }
+          .brand { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #6366f1; font-weight: bold; margin-bottom: 10px; }
+          .title { font-size: 28px; font-weight: bold; color: #1e293b; margin: 0; }
+          .subtitle { font-size: 16px; color: #64748b; margin-top: 5px; }
+          .meta { font-size: 14px; color: #94a3b8; margin-top: 10px; }
           
           .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-          .card { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #eee; }
-          .card-title { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #95a5a6; margin-bottom: 10px; font-weight: 600; }
-          .card-value { font-size: 24px; font-weight: bold; color: #2c3e50; }
+          .card { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+          .card-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 8px; font-weight: 600; }
+          .card-value { font-size: 24px; font-weight: bold; color: #0f172a; }
           
           .section { margin-top: 40px; }
-          .section-title { font-size: 20px; font-weight: bold; color: #2c3e50; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+          .section-title { font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; }
           
-          table { width: 100%; border-collapse: collapse; }
-          th { text-align: left; padding: 12px; background: #f2f2f2; color: #7f8c8d; font-weight: 600; font-size: 14px; }
-          td { padding: 12px; border-bottom: 1px solid #eee; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th { text-align: left; padding: 12px; background: #f1f5f9; color: #475569; font-weight: 600; font-size: 13px; border-radius: 6px 6px 0 0; }
+          td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+          tr:last-child td { border-bottom: none; }
           
-          .highlight { color: #27ae60; font-weight: bold; }
-          .expenses { color: #c0392b; font-weight: bold; }
+          .highlight { color: #10b981; font-weight: bold; }
+          .expenses { color: #ef4444; font-weight: bold; }
           
           .achievements-list { list-style: none; padding: 0; }
-          .achievement-item { padding: 10px; border-bottom: 1px solid #f2f2f2; display: flex; align-items: center; }
-          .achievement-item:before { content: "★"; color: #f1c40f; margin-right: 10px; font-size: 18px; }
+          .achievement-item { padding: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; font-size: 14px; }
+          .achievement-item:before { content: "★"; color: #fbbf24; margin-right: 12px; font-size: 16px; }
           
-          .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #bdc3c7; border-top: 1px solid #eee; padding-top: 20px; }
+          .footer { margin-top: 60px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+          
+          @media print {
+            body { padding: 0; }
+            .no-print { display: none; }
+          }
         </style>
       </head>
       <body>
         <div class="header">
+          <div class="brand">TakaTrack</div>
           <h1 class="title">${report.title}</h1>
-          <div class="subtitle">Detailed Financial & Lifestyle Analysis</div>
-          <div class="meta">Period: ${new Date(report.startDate).toLocaleDateString()} - ${new Date(report.endDate).toLocaleDateString()}</div>
+          <div class="subtitle">Financial Health & Lifestyle Report</div>
+          <div class="meta">${new Date(report.startDate).toLocaleDateString()} - ${new Date(report.endDate).toLocaleDateString()}</div>
         </div>
 
         <div class="grid">
           <div class="card">
             <div class="card-title">Financial Health</div>
             <div class="card-value" style="color: ${
-              report.financialHealthStatus === 'EXCELLENT' ? '#27ae60' : 
-              report.financialHealthStatus === 'GOOD' ? '#2980b9' : '#e67e22'
+              report.financialHealthStatus === 'EXCELLENT' ? '#10b981' : 
+              report.financialHealthStatus === 'GOOD' ? '#3b82f6' : '#f59e0b'
             }">
               ${report.financialHealthStatus}
             </div>
-            <div style="font-size: 14px; color: #7f8c8d; margin-top: 5px;">Score: ${report.financialHealthScore}/100</div>
+            <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Score: ${report.financialHealthScore}/100</div>
           </div>
           <div class="card">
             <div class="card-title">Net Savings</div>
             <div class="card-value highlight">$${report.netSavings.toLocaleString()}</div>
-            <div style="font-size: 14px; color: #7f8c8d; margin-top: 5px;">Savings Rate: ${report.savingsRate}%</div>
+            <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Savings Rate: ${report.savingsRate}%</div>
           </div>
         </div>
 
@@ -219,7 +228,7 @@ export default function LifestyleReportsPage() {
               <tr>
                 <th>Category</th>
                 <th>Amount</th>
-                <th>% of Total</th>
+                <th>Share</th>
               </tr>
             </thead>
             <tbody>
@@ -235,7 +244,7 @@ export default function LifestyleReportsPage() {
         </div>
 
         <div class="section">
-          <h2 class="section-title">Achievements & Insights</h2>
+          <h2 class="section-title">Achievements</h2>
           <ul class="achievements-list">
             ${report.achievements.map(a => `
               <li class="achievement-item">${a}</li>
@@ -244,21 +253,21 @@ export default function LifestyleReportsPage() {
         </div>
 
         <div class="footer">
-          Generated by Antigravity Finance on ${new Date().toLocaleDateString()}
+          Generated by TakaTrack AI &bull; ${new Date().toLocaleDateString()}
         </div>
+        
+        <script>
+          window.onload = function() { window.print(); }
+        </script>
       </body>
       </html>
     `;
 
-    const blob = new Blob([content], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${report.title.replace(/\s+/g, "_")}.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(content);
+      printWindow.document.close();
+    }
   };
 
   return (
@@ -425,24 +434,18 @@ export default function LifestyleReportsPage() {
                        <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">Score</span>
                     </div>
                  </div>
-                 
-                 <div className="w-full space-y-4 mt-4">
-                    {[
-                       { label: "Savings Habit", score: 92, color: "bg-green-500" },
-                       { label: "Budget Control", score: 85, color: "bg-blue-500" },
-                       { label: "Debt Management", score: 78, color: "bg-yellow-500" },
-                    ].map((metric) => (
-                       <div key={metric.label} className="space-y-1">
-                          <div className="flex justify-between text-sm">
-                             <span className="font-medium">{metric.label}</span>
-                             <span className="text-muted-foreground">{metric.score}/100</span>
-                          </div>
-                          <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                             <div className={`h-full ${metric.color} rounded-full`} style={{ width: `${metric.score}%` }} />
-                          </div>
-                       </div>
-                    ))}
-                 </div>
+                                  <div className="w-full space-y-4 mt-4">
+                     {/* Dynamic Health Metrics (if available) or Empty */}
+                     {activeReport.financialHealthScore > 0 ? (
+                        <div className="text-center p-4 bg-muted/50 rounded-lg">
+                           <p className="text-sm text-muted-foreground">Detailed breakdown available in full report.</p>
+                        </div>
+                     ) : (
+                        <div className="text-center text-muted-foreground text-sm">
+                           No detailed metrics available.
+                        </div>
+                     )}
+                  </div>
               </CardContent>
            </Card>
 
