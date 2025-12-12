@@ -37,6 +37,7 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - SPRING_PROFILES_ACTIVE=default
     ports:
       - "8080:8080"   # optional: can omit if only proxied by nginx
