@@ -206,3 +206,21 @@ body.dark {
     @apply bg-background text-foreground;
   }
 }
+
+/* Mobile Responsive Dialog Overrides */
+@media (max-width: 640px) {
+  [data-radix-popper-content-wrapper] {
+    max-width: 90vw !important;
+  }
+  
+  [role="dialog"] {
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    padding: 1rem !important;
+  }
+
+  .glass-card {
+    padding: 1rem !important;
+  }
+}

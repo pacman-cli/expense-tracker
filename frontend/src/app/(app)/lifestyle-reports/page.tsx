@@ -32,6 +32,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 // ... Interfaces (keep existing) ...
@@ -68,105 +76,30 @@ interface Insight {
 }
 
 export default function LifestyleReportsPage() {
-  const [selectedPeriod, setSelectedPeriod] = useState<
-    "monthly" | "quarterly" | "yearly"
-  >("monthly");
-  const [, setSelectedReport] = useState<LifestyleReport | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<"monthly" | "quarterly" | "yearly">("monthly");
+  const [selectedReport, setSelectedReport] = useState<LifestyleReport | null>(null);
 
   // Mock data (Keep existing)
-  const reports: LifestyleReport[] = [
-    {
-      id: 1,
-      title: "January 2024 Lifestyle Report",
-      period: "MONTHLY",
-      startDate: "2024-01-01",
-      endDate: "2024-01-31",
-      totalIncome: 8500,
-      totalExpenses: 6200,
-      netSavings: 2300,
-      savingsRate: 27.06,
-      financialHealthScore: 85,
-      financialHealthStatus: "EXCELLENT",
-      lifestyleType: "BALANCED",
-      spendingPattern: "CONSISTENT",
-      topCategories: [
-        { name: "Housing", amount: 2000, percentage: 32.26 },
-        { name: "Food & Dining", amount: 1200, percentage: 19.35 },
-        { name: "Transportation", amount: 800, percentage: 12.9 },
-        { name: "Entertainment", amount: 600, percentage: 9.68 },
-        { name: "Shopping", amount: 500, percentage: 8.06 },
-      ],
-      achievements: [
-        "Stayed within budget all month",
-        "Saved 27% of income",
-        "Reduced dining expenses by 15%",
-        "Met savings goal for January",
-      ],
-      isViewed: true,
-      createdAt: "2024-02-01",
-    },
-    {
-      id: 2,
-      title: "December 2023 Lifestyle Report",
-      period: "MONTHLY",
-      startDate: "2023-12-01",
-      endDate: "2023-12-31",
-      totalIncome: 9200,
-      totalExpenses: 7800,
-      netSavings: 1400,
-      savingsRate: 15.22,
-      financialHealthScore: 72,
-      financialHealthStatus: "GOOD",
-      lifestyleType: "HIGH_SPENDER",
-      spendingPattern: "SEASONAL",
-      topCategories: [
-        { name: "Shopping", amount: 2200, percentage: 28.21 },
-        { name: "Housing", amount: 2000, percentage: 25.64 },
-        { name: "Food & Dining", amount: 1500, percentage: 19.23 },
-        { name: "Gifts", amount: 800, percentage: 10.26 },
-        { name: "Entertainment", amount: 700, percentage: 8.97 },
-      ],
-      achievements: [
-        "Holiday spending controlled",
-        "Maintained emergency fund",
-        "Paid off credit card",
-      ],
-      isViewed: true,
-      createdAt: "2024-01-01",
-    },
-    {
-      id: 3,
-      title: "November 2023 Lifestyle Report",
-      period: "MONTHLY",
-      startDate: "2023-11-01",
-      endDate: "2023-11-30",
-      totalIncome: 8500,
-      totalExpenses: 5800,
-      netSavings: 2700,
-      savingsRate: 31.76,
-      financialHealthScore: 88,
-      financialHealthStatus: "EXCELLENT",
-      lifestyleType: "BALANCED",
-      spendingPattern: "CONSISTENT",
-      topCategories: [
-        { name: "Housing", amount: 2000, percentage: 34.48 },
-        { name: "Food & Dining", amount: 1000, percentage: 17.24 },
-        { name: "Transportation", amount: 750, percentage: 12.93 },
-        { name: "Utilities", amount: 600, percentage: 10.34 },
-        { name: "Entertainment", amount: 450, percentage: 7.76 },
-      ],
-      achievements: [
-        "Highest savings rate this year!",
-        "Zero impulse purchases",
-        "Stayed under budget in all categories",
-        "Invested $1000 in savings",
-      ],
-      isViewed: true,
-      createdAt: "2023-12-01",
-    },
-  ];
+  const reports: LifestyleReport[] = []; // Cleared mock data
 
-  const latestReport = reports[0];
+
+  if (reports.length === 0) {
+    return (
+      <div className="min-h-screen bg-background p-4 md:p-8 space-y-8 pb-20 md:pb-8 flex flex-col items-center justify-center">
+        <div className="text-center space-y-4">
+           <div className="bg-primary/10 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+              <Sparkles className="w-8 h-8 text-primary" />
+           </div>
+           <h1 className="text-2xl font-bold">No Lifestyle Reports Yet</h1>
+           <p className="text-muted-foreground max-w-sm mx-auto">
+             Your financial insights will appear here once you have enough transaction data.
+           </p>
+        </div>
+      </div>
+    );
+  }
+
+  const activeReport = selectedReport || reports[0];
 
   const getHealthColor = (status: string) => {
     switch (status) {
@@ -203,6 +136,129 @@ export default function LifestyleReportsPage() {
     };
     const Icon = iconMap[name] || ShoppingBag;
     return <Icon className="w-4 h-4" />;
+  };
+
+  const handleDownload = () => {
+    const report = activeReport;
+    
+    // Create detailed HTML content
+    const content = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Lifestyle Report - ${report.title}</title>
+        <style>
+          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
+          .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #eee; }
+          .title { font-size: 28px; font-weight: bold; color: #2c3e50; margin: 0; }
+          .subtitle { font-size: 16px; color: #7f8c8d; margin-top: 5px; }
+          .meta { font-size: 14px; color: #95a5a6; margin-top: 10px; }
+          
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+          .card { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #eee; }
+          .card-title { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #95a5a6; margin-bottom: 10px; font-weight: 600; }
+          .card-value { font-size: 24px; font-weight: bold; color: #2c3e50; }
+          
+          .section { margin-top: 40px; }
+          .section-title { font-size: 20px; font-weight: bold; color: #2c3e50; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+          
+          table { width: 100%; border-collapse: collapse; }
+          th { text-align: left; padding: 12px; background: #f2f2f2; color: #7f8c8d; font-weight: 600; font-size: 14px; }
+          td { padding: 12px; border-bottom: 1px solid #eee; }
+          
+          .highlight { color: #27ae60; font-weight: bold; }
+          .expenses { color: #c0392b; font-weight: bold; }
+          
+          .achievements-list { list-style: none; padding: 0; }
+          .achievement-item { padding: 10px; border-bottom: 1px solid #f2f2f2; display: flex; align-items: center; }
+          .achievement-item:before { content: "★"; color: #f1c40f; margin-right: 10px; font-size: 18px; }
+          
+          .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #bdc3c7; border-top: 1px solid #eee; padding-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1 class="title">${report.title}</h1>
+          <div class="subtitle">Detailed Financial & Lifestyle Analysis</div>
+          <div class="meta">Period: ${new Date(report.startDate).toLocaleDateString()} - ${new Date(report.endDate).toLocaleDateString()}</div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="card-title">Financial Health</div>
+            <div class="card-value" style="color: ${
+              report.financialHealthStatus === 'EXCELLENT' ? '#27ae60' : 
+              report.financialHealthStatus === 'GOOD' ? '#2980b9' : '#e67e22'
+            }">
+              ${report.financialHealthStatus}
+            </div>
+            <div style="font-size: 14px; color: #7f8c8d; margin-top: 5px;">Score: ${report.financialHealthScore}/100</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Net Savings</div>
+            <div class="card-value highlight">$${report.netSavings.toLocaleString()}</div>
+            <div style="font-size: 14px; color: #7f8c8d; margin-top: 5px;">Savings Rate: ${report.savingsRate}%</div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="card-title">Total Income</div>
+            <div class="card-value">$${report.totalIncome.toLocaleString()}</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Total Expenses</div>
+            <div class="card-value expenses">$${report.totalExpenses.toLocaleString()}</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Top Spending Categories</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>% of Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${report.topCategories.map(cat => `
+                <tr>
+                  <td>${cat.name}</td>
+                  <td>$${cat.amount.toLocaleString()}</td>
+                  <td>${cat.percentage}%</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Achievements & Insights</h2>
+          <ul class="achievements-list">
+            ${report.achievements.map(a => `
+              <li class="achievement-item">${a}</li>
+            `).join('')}
+          </ul>
+        </div>
+
+        <div class="footer">
+          Generated by Antigravity Finance on ${new Date().toLocaleDateString()}
+        </div>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([content], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${report.title.replace(/\s+/g, "_")}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -243,23 +299,23 @@ export default function LifestyleReportsPage() {
                     <Badge variant="secondary" className="mb-2 bg-white/20 text-white hover:bg-white/30 border-none">
                        Latest Report
                     </Badge>
-                    <h2 className="text-3xl font-bold">{latestReport.title}</h2>
+                    <h2 className="text-3xl font-bold">{activeReport.title}</h2>
                     <p className="text-white/80 mt-1">
-                       {new Date(latestReport.startDate).toLocaleDateString()} - {new Date(latestReport.endDate).toLocaleDateString()}
+                       {new Date(activeReport.startDate).toLocaleDateString()} - {new Date(activeReport.endDate).toLocaleDateString()}
                     </p>
                  </div>
                  <Badge variant="secondary" className="self-start md:self-center px-4 py-2 bg-white/20 text-white backdrop-blur-md border-none gap-2 text-base">
-                    {getHealthIcon(latestReport.financialHealthStatus)}
-                    {latestReport.financialHealthStatus}
+                    {getHealthIcon(activeReport.financialHealthStatus)}
+                    {activeReport.financialHealthStatus}
                  </Badge>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                  {[
-                    { label: "Income", amount: latestReport.totalIncome, icon: TrendingUp },
-                    { label: "Expenses", amount: latestReport.totalExpenses, icon: TrendingDown },
-                    { label: "Net Savings", amount: latestReport.netSavings, icon: Wallet },
-                    { label: "Savings Rate", amount: `${latestReport.savingsRate.toFixed(1)}%`, icon: Target, isText: true }
+                    { label: "Income", amount: activeReport.totalIncome, icon: TrendingUp },
+                    { label: "Expenses", amount: activeReport.totalExpenses, icon: TrendingDown },
+                    { label: "Net Savings", amount: activeReport.netSavings, icon: Wallet },
+                    { label: "Savings Rate", amount: `${activeReport.savingsRate.toFixed(1)}%`, icon: Target, isText: true }
                  ].map((stat, i) => (
                     <div key={i} className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-colors">
                        <div className="flex items-center gap-2 mb-2 text-white/80">
@@ -274,10 +330,63 @@ export default function LifestyleReportsPage() {
               </div>
 
               <div className="flex flex-wrap gap-3 mt-8">
-                 <Button variant="secondary" className="bg-white text-indigo-600 hover:bg-white/90">
-                    <Eye className="w-4 h-4 mr-2" /> View Details
-                 </Button>
-                 <Button variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10">
+                 <Dialog>
+                    <DialogTrigger asChild>
+                       <Button variant="secondary" className="bg-white text-indigo-600 hover:bg-white/90">
+                          <Eye className="w-4 h-4 mr-2" /> View Details
+                       </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                       <DialogHeader>
+                          <DialogTitle>{activeReport.title}</DialogTitle>
+                          <DialogDescription>
+                             Report period: {new Date(activeReport.startDate).toLocaleDateString()} - {new Date(activeReport.endDate).toLocaleDateString()}
+                          </DialogDescription>
+                       </DialogHeader>
+                       <div className="space-y-6 mt-4">
+                          <div className="grid grid-cols-2 gap-4">
+                             <div className="p-4 bg-muted/50 rounded-lg">
+                                <p className="text-sm text-muted-foreground">Total Income</p>
+                                <p className="text-xl font-bold text-green-600">${activeReport.totalIncome.toLocaleString()}</p>
+                             </div>
+                             <div className="p-4 bg-muted/50 rounded-lg">
+                                <p className="text-sm text-muted-foreground">Total Expenses</p>
+                                <p className="text-xl font-bold text-red-600">${activeReport.totalExpenses.toLocaleString()}</p>
+                             </div>
+                          </div>
+                          
+                          <div>
+                             <h4 className="font-semibold mb-2">Top Categories</h4>
+                             <div className="space-y-2">
+                                {activeReport.topCategories.map((cat, i) => (
+                                   <div key={i} className="flex justify-between items-center p-2 border rounded hover:bg-muted/50">
+                                      <span>{cat.name}</span>
+                                      <div className="text-right">
+                                         <span className="font-bold block">${cat.amount}</span>
+                                         <span className="text-xs text-muted-foreground">{cat.percentage}%</span>
+                                      </div>
+                                   </div>
+                                ))}
+                             </div>
+                          </div>
+
+                          <div>
+                             <h4 className="font-semibold mb-2">Achievements</h4>
+                             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                                {activeReport.achievements.map((a, i) => (
+                                   <li key={i}>{a}</li>
+                                ))}
+                             </ul>
+                          </div>
+                       </div>
+                    </DialogContent>
+                 </Dialog>
+
+                 <Button 
+                    variant="outline" 
+                    className="bg-transparent border-white/30 text-white hover:bg-white/10"
+                    onClick={handleDownload}
+                 >
                     <Download className="w-4 h-4 mr-2" /> Download
                  </Button>
               </div>
@@ -301,7 +410,7 @@ export default function LifestyleReportsPage() {
                           cx="96" cy="96" r="88" fill="none" stroke="url(#gradient)" strokeWidth="12" strokeLinecap="round"
                           strokeDasharray={`${2 * Math.PI * 88}`}
                           initial={{ strokeDashoffset: 2 * Math.PI * 88 }}
-                          animate={{ strokeDashoffset: 2 * Math.PI * 88 * (1 - latestReport.financialHealthScore / 100) }}
+                          animate={{ strokeDashoffset: 2 * Math.PI * 88 * (1 - activeReport.financialHealthScore / 100) }}
                           transition={{ duration: 1.5, ease: "easeOut" }}
                        />
                        <defs>
@@ -312,7 +421,7 @@ export default function LifestyleReportsPage() {
                        </defs>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                       <span className="text-5xl font-bold tracking-tight">{latestReport.financialHealthScore}</span>
+                       <span className="text-5xl font-bold tracking-tight">{activeReport.financialHealthScore}</span>
                        <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">Score</span>
                     </div>
                  </div>
@@ -346,7 +455,7 @@ export default function LifestyleReportsPage() {
                     <CardDescription>Where your money went this month</CardDescription>
                  </CardHeader>
                  <CardContent className="space-y-6">
-                    {latestReport.topCategories.map((category) => (
+                    {activeReport.topCategories.map((category) => (
                        <div key={category.name} className="space-y-2">
                           <div className="flex items-center justify-between">
                              <div className="flex items-center gap-3">
@@ -383,7 +492,7 @@ export default function LifestyleReportsPage() {
                  </CardHeader>
                  <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       {latestReport.achievements.map((achievement, idx) => (
+                       {activeReport.achievements.map((achievement, idx) => (
                           <div key={idx} className="flex items-center gap-3 p-3 bg-background/50 backdrop-blur-sm rounded-lg border border-border/50">
                              <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
                                 <Star className="w-4 h-4 text-green-600 dark:text-green-400" />

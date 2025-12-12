@@ -29,12 +29,15 @@ services:
       db:
         condition: service_healthy
     environment:
-      MYSQL_HOST: db
-      MYSQL_PORT: 3306
-      MYSQL_DATABASE: "${MYSQL_DATABASE:-appdb}"
-      MYSQL_USER: "${MYSQL_USER:-appuser}"
-      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-apppassword}"
-      SPRING_PROFILES_ACTIVE: default
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-appdb}
+      - MYSQL_USER=${MYSQL_USER:-appuser}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-apppassword}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - SPRING_PROFILES_ACTIVE=default
     ports:
       - "8080:8080"   # optional: can omit if only proxied by nginx
     networks:
