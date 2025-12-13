@@ -353,8 +353,8 @@ export default function AIInsightsPage() {
                 <div className="h-4 bg-slate-800/50 rounded animate-pulse w-4/6" />
             </div>
           ) : (
-            <div className="prose dark:prose-invert max-w-none">
-                <ReactMarkdown className="text-sm leading-relaxed text-muted-foreground">
+            <div className="prose dark:prose-invert max-w-none text-sm leading-relaxed text-muted-foreground">
+                <ReactMarkdown>
                     {geminiAnalysis}
                 </ReactMarkdown>
             </div>
