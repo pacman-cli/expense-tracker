@@ -38,3 +38,19 @@ This project includes a `deploy.sh` script to make updating the live server easi
 -   **Permission Denied**: Run `chmod +x deploy.sh`.
 -   **Env Vars Missing**: Check your `.env` file.
 -   **Container Crash**: Run `docker compose logs --tail=100 <service_name>` (e.g., `backend` or `frontend`).
+
+## Server Diagnostics (Website going down?)
+
+If the website goes down periodically, it is likely an "Out of Memory" (OOM) issue.
+
+1.  **Run the analysis script**:
+    ```bash
+    chmod +x analyze_server.sh
+    ./analyze_server.sh
+    ```
+
+2.  **Read the output**:
+    -   Look for **"OOM Killer detected"** or **"Java OutOfMemoryError"**.
+    -   If found, your server does not have enough RAM for the current configuration.
+    -   **Fix**: Edit `backend/Dockerfile` and lower `-Xmx4096m` to something smaller (e.g., `-Xmx512m` or `-Xmx1024m`) depending on your Droplet size.
+
