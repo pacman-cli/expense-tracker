@@ -106,6 +106,7 @@ backend/uploads/receipts/*
 # ====================
 *.sql
 !backend/src/main/resources/sql/*.sql
+!backend/src/main/resources/db/migration/*.sql
 *.sqlite
 *.db
 
