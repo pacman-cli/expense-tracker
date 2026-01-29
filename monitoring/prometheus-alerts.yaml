@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: takatrack-alerts
+  namespace: monitoring
+spec:
+  groups:
+  - name: takatrack.rules
+    rules:
+    - alert: HighCpuUsage
+      expr: container_cpu_usage_seconds_total{namespace="takatrack"} > 0.8
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU usage on {{ $labels.pod }}"
+    - alert: HighMemoryUsage
+      expr: container_memory_usage_bytes{namespace="takatrack"} > 1e+09
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High Memory usage on {{ $labels.pod }}"
+    - alert: BackendErrorRate
+      expr: rate(http_server_requests_seconds_count{status=~"5.."}[5m]) > 0.05
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High error rate on backend"

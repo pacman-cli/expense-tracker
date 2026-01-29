@@ -1,0 +1,61 @@
+# This is a placeholder for a Grafana dashboard JSON.
+# In a real scenario, this would be a large JSON exported from Grafana.
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": 1,
+    "links": [],
+    "panels": [
+        {
+            "title": "Backend CPU Usage",
+            "type": "timeseries",
+            "datasource": "Prometheus",
+            "targets": [
+                {
+                    "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"takatrack\", pod=~\"backend.*\"}[5m]))",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "title": "Backend Request Rate",
+            "type": "timeseries",
+            "datasource": "Prometheus",
+            "targets": [
+                {
+                    "expr": "sum(rate(http_server_requests_seconds_count{namespace=\"takatrack\"}[5m]))",
+                    "refId": "A"
+                }
+            ]
+        }
+    ],
+    "schemaVersion": 36,
+    "style": "dark",
+    "tags": [
+        "takatrack"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "title": "TakaTrack Overview",
+    "uid": "takatrack-overview",
+    "version": 1
+}
