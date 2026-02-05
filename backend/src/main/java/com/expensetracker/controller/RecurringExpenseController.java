@@ -24,6 +24,8 @@ import com.expensetracker.repository.UserRepository;
 import com.expensetracker.service.RecurringExpenseScheduler;
 import com.expensetracker.service.UserDetailsImpl;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/recurring-expenses")
 public class RecurringExpenseController {
@@ -55,7 +57,7 @@ public class RecurringExpenseController {
     @PostMapping
     public ResponseEntity<RecurringExpenseDTO> create(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestBody RecurringExpenseDTO dto) {
+            @Valid @RequestBody RecurringExpenseDTO dto) {
 
         RecurringExpense.Frequency frequency;
         try {
@@ -87,7 +89,7 @@ public class RecurringExpenseController {
     public ResponseEntity<RecurringExpenseDTO> update(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestBody RecurringExpenseDTO dto) {
+            @Valid @RequestBody RecurringExpenseDTO dto) {
 
         RecurringExpense expense = recurringExpenseRepository.findById(id)
                 .orElseThrow(() -> new com.expensetracker.exception.ResourceNotFoundException(
@@ -138,6 +140,22 @@ public class RecurringExpenseController {
     public ResponseEntity<Map<String, Integer>> generateNow() {
         int count = scheduler.generateNow();
         return ResponseEntity.ok(Map.of("generated", count));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RecurringExpenseDTO> getById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        RecurringExpense expense = recurringExpenseRepository.findById(id)
+                .orElseThrow(() -> new com.expensetracker.exception.ResourceNotFoundException(
+                        "Recurring expense not found"));
+
+        if (!expense.getUser().getId().equals(userDetails.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        return ResponseEntity.ok(convertToDTO(expense));
     }
 
     private RecurringExpenseDTO convertToDTO(RecurringExpense expense) {

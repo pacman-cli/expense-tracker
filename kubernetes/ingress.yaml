@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: takatrack-ingress
@@ -8,7 +8,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/certificate-arn: <ACM_CERTIFICATE_ARN>
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:135247151840:certificate/dfb86a42-ffc3-4413-a6b9-caf2e6e5742a
     alb.ingress.kubernetes.io/ssl-redirect: '443'
 spec:
   rules:

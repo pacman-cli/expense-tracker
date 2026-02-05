@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init-v1-manual
+  namespace: takatrack
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    spec:
+      containers:
+        - name: init-db
+          image: mysql:8.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD takatrack < /fixed-sql/V1__Init_Schema.sql
+          env:
+            - name: DB_HOST
+              value: takatrack-db.cwl62cq0ol75.us-east-1.rds.amazonaws.com
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_password
+          volumeMounts:
+            - name: fixed-sql-volume
+              mountPath: /fixed-sql
+      volumes:
+        - name: fixed-sql-volume
+          configMap:
+            name: flyway-migrations
+      restartPolicy: Never

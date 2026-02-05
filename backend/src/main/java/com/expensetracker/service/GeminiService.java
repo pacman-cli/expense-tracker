@@ -44,7 +44,6 @@ public class GeminiService {
             String response = callGeminiAPI(prompt);
             return response.trim();
         } catch (Exception e) {
-            System.err.println("Error calling Gemini API for categorization: " + e.getMessage());
             return "Uncategorized";
         }
     }
@@ -79,7 +78,6 @@ public class GeminiService {
             insights.put("topCategory", getTopCategory(categoryTotals));
             return insights;
         } catch (Exception e) {
-            System.err.println("Error getting AI insights: " + e.getMessage());
             return getDefaultInsights();
         }
     }

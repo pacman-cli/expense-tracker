@@ -1,241 +1,213 @@
--- Init Schema Migration
+-- Init Schema Migration for PostgreSQL
 -- Generated based on JPA Entities
 
 -- 1. Users
-CREATE TABLE IF NOT EXISTS `users` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `email` varchar(255) NOT NULL,
-  `full_name` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `UK_users_email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS users (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  full_name VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role VARCHAR(255)
+);
 
 -- 2. Categories
-CREATE TABLE IF NOT EXISTS `categories` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `color` varchar(255) DEFAULT NULL,
-  `icon` varchar(255) DEFAULT NULL,
-  `name` varchar(255) NOT NULL,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_categories_user` (`user_id`),
-  CONSTRAINT `FK_categories_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS categories (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  color VARCHAR(255),
+  icon VARCHAR(255),
+  name VARCHAR(255) NOT NULL,
+  user_id BIGINT NOT NULL,
+  CONSTRAINT fk_categories_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
 
 -- 3. Wallets
-CREATE TABLE IF NOT EXISTS `wallets` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `balance` decimal(38,2) NOT NULL,
-  `currency` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `type` varchar(255) NOT NULL,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_wallets_user` (`user_id`),
-  CONSTRAINT `FK_wallets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS wallets (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  balance NUMERIC(38,2) NOT NULL,
+  currency VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  type VARCHAR(255) NOT NULL,
+  user_id BIGINT NOT NULL,
+  CONSTRAINT fk_wallets_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
 
 -- 4. Expenses
-CREATE TABLE IF NOT EXISTS `expenses` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `amount` decimal(38,2) NOT NULL,
-  `date` date NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `category_id` bigint DEFAULT NULL,
-  `user_id` bigint NOT NULL,
-  `wallet_id` bigint DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_expenses_category` (`category_id`),
-  KEY `FK_expenses_user` (`user_id`),
-  KEY `FK_expenses_wallet` (`wallet_id`),
-  CONSTRAINT `FK_expenses_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
-  CONSTRAINT `FK_expenses_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  CONSTRAINT `FK_expenses_wallet` FOREIGN KEY (`wallet_id`) REFERENCES `wallets` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS expenses (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  amount NUMERIC(38,2) NOT NULL,
+  date DATE NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  category_id BIGINT,
+  user_id BIGINT NOT NULL,
+  wallet_id BIGINT,
+  CONSTRAINT fk_expenses_category FOREIGN KEY (category_id) REFERENCES categories (id),
+  CONSTRAINT fk_expenses_user FOREIGN KEY (user_id) REFERENCES users (id),
+  CONSTRAINT fk_expenses_wallet FOREIGN KEY (wallet_id) REFERENCES wallets (id)
+);
 
 -- 5. Budgets
-CREATE TABLE IF NOT EXISTS `budgets` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `amount` decimal(38,2) NOT NULL,
-  `month` int NOT NULL,
-  `spent` decimal(38,2) NOT NULL,
-  `year` int NOT NULL,
-  `category_id` bigint NOT NULL,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_budgets_category` (`category_id`),
-  KEY `FK_budgets_user` (`user_id`),
-  CONSTRAINT `FK_budgets_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
-  CONSTRAINT `FK_budgets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS budgets (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  amount NUMERIC(38,2) NOT NULL,
+  month INT NOT NULL,
+  spent NUMERIC(38,2) NOT NULL,
+  year INT NOT NULL,
+  category_id BIGINT NOT NULL,
+  user_id BIGINT NOT NULL,
+  CONSTRAINT fk_budgets_category FOREIGN KEY (category_id) REFERENCES categories (id),
+  CONSTRAINT fk_budgets_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
 
 -- 6. Recurring Expenses
-CREATE TABLE IF NOT EXISTS `recurring_expenses` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `active` bit(1) NOT NULL,
-  `amount` decimal(38,2) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `end_date` date DEFAULT NULL,
-  `frequency` varchar(255) NOT NULL,
-  `next_due_date` date NOT NULL,
-  `start_date` date NOT NULL,
-  `category_id` bigint DEFAULT NULL,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_recurring_expenses_category` (`category_id`),
-  KEY `FK_recurring_expenses_user` (`user_id`),
-  CONSTRAINT `FK_recurring_expenses_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
-  CONSTRAINT `FK_recurring_expenses_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS recurring_expenses (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  active BOOLEAN NOT NULL,
+  amount NUMERIC(38,2) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  end_date DATE,
+  frequency VARCHAR(255) NOT NULL,
+  next_due_date DATE NOT NULL,
+  start_date DATE NOT NULL,
+  category_id BIGINT,
+  user_id BIGINT NOT NULL,
+  CONSTRAINT fk_recurring_expenses_category FOREIGN KEY (category_id) REFERENCES categories (id),
+  CONSTRAINT fk_recurring_expenses_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
 
 -- 7. Expense Templates
-CREATE TABLE IF NOT EXISTS `expense_templates` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `active` bit(1) NOT NULL,
-  `amount` decimal(38,2) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `favorite` bit(1) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `usage_count` int NOT NULL,
-  `category_id` bigint DEFAULT NULL,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_expense_templates_category` (`category_id`),
-  KEY `FK_expense_templates_user` (`user_id`),
-  CONSTRAINT `FK_expense_templates_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
-  CONSTRAINT `FK_expense_templates_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS expense_templates (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  active BOOLEAN NOT NULL,
+  amount NUMERIC(38,2) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  favorite BOOLEAN NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  usage_count INT NOT NULL,
+  category_id BIGINT,
+  user_id BIGINT NOT NULL,
+  CONSTRAINT fk_expense_templates_category FOREIGN KEY (category_id) REFERENCES categories (id),
+  CONSTRAINT fk_expense_templates_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
 
 -- 8. Debts
-CREATE TABLE IF NOT EXISTS `debts` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `attachment_url` varchar(500) DEFAULT NULL,
-  `contact_info` varchar(255) DEFAULT NULL,
-  `creditor_debtor` varchar(255) DEFAULT NULL,
-  `description` varchar(1000) DEFAULT NULL,
-  `due_date` date DEFAULT NULL,
-  `installment_amount` decimal(38,2) DEFAULT NULL,
-  `interest_rate` decimal(38,2) NOT NULL,
-  `is_recurring` bit(1) NOT NULL,
-  `notes` varchar(500) DEFAULT NULL,
-  `payment_frequency` varchar(255) DEFAULT NULL,
-  `remaining_amount` decimal(38,2) NOT NULL,
-  `principal_amount` decimal(38,2) NOT NULL,
-  `priority` varchar(255) DEFAULT NULL,
-  `start_date` date NOT NULL,
-  `status` varchar(255) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `type` varchar(255) NOT NULL,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_debts_user` (`user_id`),
-  CONSTRAINT `FK_debts_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS debts (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  attachment_url VARCHAR(500),
+  contact_info VARCHAR(255),
+  creditor_debtor VARCHAR(255),
+  description VARCHAR(1000),
+  due_date DATE,
+  installment_amount NUMERIC(38,2),
+  interest_rate NUMERIC(38,2) NOT NULL,
+  is_recurring BOOLEAN NOT NULL,
+  notes VARCHAR(500),
+  payment_frequency VARCHAR(255),
+  remaining_amount NUMERIC(38,2) NOT NULL,
+  principal_amount NUMERIC(38,2) NOT NULL,
+  priority VARCHAR(255),
+  start_date DATE NOT NULL,
+  status VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  type VARCHAR(255) NOT NULL,
+  user_id BIGINT NOT NULL,
+  CONSTRAINT fk_debts_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
 
 -- 9. Debt Payments
-CREATE TABLE IF NOT EXISTS `debt_payments` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `amount` decimal(38,2) NOT NULL,
-  `interest_portion` decimal(38,2) DEFAULT NULL,
-  `is_verified` bit(1) NOT NULL,
-  `notes` varchar(500) DEFAULT NULL,
-  `payment_date` date NOT NULL,
-  `payment_method` varchar(255) NOT NULL,
-  `principal_portion` decimal(38,2) DEFAULT NULL,
-  `receipt_url` varchar(500) DEFAULT NULL,
-  `transaction_id` varchar(255) DEFAULT NULL,
-  `debt_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_debt_payments_debt` (`debt_id`),
-  CONSTRAINT `FK_debt_payments_debt` FOREIGN KEY (`debt_id`) REFERENCES `debts` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS debt_payments (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  amount NUMERIC(38,2) NOT NULL,
+  interest_portion NUMERIC(38,2),
+  is_verified BOOLEAN NOT NULL,
+  notes VARCHAR(500),
+  payment_date DATE NOT NULL,
+  payment_method VARCHAR(255) NOT NULL,
+  principal_portion NUMERIC(38,2),
+  receipt_url VARCHAR(500),
+  transaction_id VARCHAR(255),
+  debt_id BIGINT NOT NULL,
+  CONSTRAINT fk_debt_payments_debt FOREIGN KEY (debt_id) REFERENCES debts (id)
+);
 
 -- 10. Refresh Tokens
-CREATE TABLE IF NOT EXISTS `refresh_tokens` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `expiry_date` datetime(6) NOT NULL,
-  `token` varchar(255) NOT NULL,
-  `user_id` bigint DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `UK_refresh_tokens_token` (`token`),
-  UNIQUE KEY `UK_refresh_tokens_user` (`user_id`),
-  CONSTRAINT `FK_refresh_tokens_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id BIGSERIAL PRIMARY KEY,
+  expiry_date TIMESTAMP NOT NULL,
+  token VARCHAR(255) NOT NULL UNIQUE,
+  user_id BIGINT UNIQUE,
+  CONSTRAINT fk_refresh_tokens_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
 
 -- 11. Tax Exports
-CREATE TABLE IF NOT EXISTS `tax_exports` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `business_expenses` decimal(38,2) DEFAULT NULL,
-  `business_income` decimal(38,2) DEFAULT NULL,
-  `business_mileage` decimal(38,2) DEFAULT NULL,
-  `capital_gains` decimal(38,2) DEFAULT NULL,
-  `capital_losses` decimal(38,2) DEFAULT NULL,
-  `charitable_donations` decimal(38,2) DEFAULT NULL,
-  `compliance_notes` varchar(1000) DEFAULT NULL,
-  `deductible_categories` varchar(3000) DEFAULT NULL,
-  `deductible_transactions` int DEFAULT NULL,
-  `download_count` int DEFAULT NULL,
-  `end_date` date NOT NULL,
-  `error_message` varchar(1000) DEFAULT NULL,
-  `excluded_categories` varchar(2000) DEFAULT NULL,
-  `expires_at` date DEFAULT NULL,
-  `export_configuration` varchar(2000) DEFAULT NULL,
-  `export_type` varchar(255) NOT NULL,
-  `file_name` varchar(500) NOT NULL,
-  `file_size` bigint NOT NULL,
-  `file_url` longtext,
-  `format` varchar(255) NOT NULL,
-  `generated_at` date DEFAULT NULL,
-  `generated_by` varchar(500) DEFAULT NULL,
-  `include_attachments` bit(1) NOT NULL,
-  `include_notes` bit(1) NOT NULL,
-  `include_receipts` bit(1) NOT NULL,
-  `included_categories` varchar(2000) DEFAULT NULL,
-  `income_breakdown` varchar(3000) DEFAULT NULL,
-  `interest_paid` decimal(38,2) DEFAULT NULL,
-  `interest_received` decimal(38,2) DEFAULT NULL,
-  `investment_income` decimal(38,2) DEFAULT NULL,
-  `is_compliant` bit(1) NOT NULL,
-  `last_downloaded_at` date DEFAULT NULL,
-  `medical_expenses` decimal(38,2) DEFAULT NULL,
-  `net_taxable_income` decimal(38,2) DEFAULT NULL,
-  `processing_notes` varchar(1000) DEFAULT NULL,
-  `start_date` date NOT NULL,
-  `status` varchar(255) NOT NULL,
-  `tax_authority` varchar(100) DEFAULT NULL,
-  `tax_id` varchar(255) DEFAULT NULL,
-  `tax_region` varchar(100) DEFAULT NULL,
-  `tax_year` int NOT NULL,
-  `total_deductible_expenses` decimal(38,2) DEFAULT NULL,
-  `total_expenses` decimal(38,2) DEFAULT NULL,
-  `total_income` decimal(38,2) DEFAULT NULL,
-  `total_non_deductible_expenses` decimal(38,2) DEFAULT NULL,
-  `total_transactions` int DEFAULT NULL,
-  `warnings` varchar(2000) DEFAULT NULL,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_tax_exports_user` (`user_id`),
-  CONSTRAINT `fk_tax_exports_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS tax_exports (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  business_expenses NUMERIC(38,2),
+  business_income NUMERIC(38,2),
+  business_mileage NUMERIC(38,2),
+  capital_gains NUMERIC(38,2),
+  capital_losses NUMERIC(38,2),
+  charitable_donations NUMERIC(38,2),
+  compliance_notes VARCHAR(1000),
+  deductible_categories VARCHAR(3000),
+  deductible_transactions INT,
+  download_count INT,
+  end_date DATE NOT NULL,
+  error_message VARCHAR(1000),
+  excluded_categories VARCHAR(2000),
+  expires_at DATE,
+  export_configuration VARCHAR(2000),
+  export_type VARCHAR(255) NOT NULL,
+  file_name VARCHAR(500) NOT NULL,
+  file_size BIGINT NOT NULL,
+  file_url TEXT,
+  format VARCHAR(255) NOT NULL,
+  generated_at DATE,
+  generated_by VARCHAR(500),
+  include_attachments BOOLEAN NOT NULL,
+  include_notes BOOLEAN NOT NULL,
+  include_receipts BOOLEAN NOT NULL,
+  included_categories VARCHAR(2000),
+  income_breakdown VARCHAR(3000),
+  interest_paid NUMERIC(38,2),
+  interest_received NUMERIC(38,2),
+  investment_income NUMERIC(38,2),
+  is_compliant BOOLEAN NOT NULL,
+  last_downloaded_at DATE,
+  medical_expenses NUMERIC(38,2),
+  net_taxable_income NUMERIC(38,2),
+  processing_notes VARCHAR(1000),
+  start_date DATE NOT NULL,
+  status VARCHAR(255) NOT NULL,
+  tax_authority VARCHAR(100),
+  tax_id VARCHAR(255),
+  tax_region VARCHAR(100),
+  tax_year INT NOT NULL,
+  total_deductible_expenses NUMERIC(38,2),
+  total_expenses NUMERIC(38,2),
+  total_income NUMERIC(38,2),
+  total_non_deductible_expenses NUMERIC(38,2),
+  total_transactions INT,
+  warnings VARCHAR(2000),
+  user_id BIGINT NOT NULL,
+  CONSTRAINT fk_tax_exports_user FOREIGN KEY (user_id) REFERENCES users (id)
+);

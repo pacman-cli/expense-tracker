@@ -21,6 +21,8 @@ import com.expensetracker.features.expense.ExpenseRepository;
 import com.expensetracker.service.GeminiService;
 import com.expensetracker.service.UserDetailsImpl;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/ai")
 public class AIController {
@@ -71,7 +73,7 @@ public class AIController {
         @PostMapping("/categorize")
         public ResponseEntity<?> suggestCategory(
                         @AuthenticationPrincipal UserDetailsImpl userDetails,
-                        @RequestBody Map<String, String> request) {
+                        @Valid @RequestBody Map<String, String> request) {
 
                 Long userId = userDetails.getId();
                 String description = request.get("description");

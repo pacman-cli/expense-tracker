@@ -1,18 +1,22 @@
 package com.expensetracker.service;
 
-import com.expensetracker.features.expense.Expense;
-import com.expensetracker.entity.RecurringExpense;
-import com.expensetracker.features.expense.ExpenseRepository;
-import com.expensetracker.repository.RecurringExpenseRepository;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.expensetracker.entity.RecurringExpense;
+import com.expensetracker.features.expense.Expense;
+import com.expensetracker.features.expense.ExpenseRepository;
+import com.expensetracker.repository.RecurringExpenseRepository;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class RecurringExpenseScheduler {
 
     @Autowired
@@ -27,7 +31,7 @@ public class RecurringExpenseScheduler {
     @Scheduled(cron = "0 0 1 * * ?")
     @Transactional
     public void generateRecurringExpenses() {
-        System.out.println("Running recurring expense scheduler...");
+        log.info("Running recurring expense scheduler...");
 
         LocalDate today = LocalDate.now();
         List<RecurringExpense> dueExpenses = recurringExpenseRepository
@@ -57,9 +61,9 @@ public class RecurringExpenseScheduler {
                 recurring.updateNextDueDate();
                 recurringExpenseRepository.save(recurring);
 
-                System.out.println("Generated recurring expense: " + recurring.getDescription());
+                log.info("Generated recurring expense: {}", recurring.getDescription());
             } catch (Exception e) {
-                System.err.println("Error generating recurring expense: " + e.getMessage());
+                log.error("Error generating recurring expense: {}", e.getMessage(), e);
             }
         }
     }
@@ -90,6 +94,7 @@ public class RecurringExpenseScheduler {
                 count++;
             }
         }
+        log.info("Generated {} recurring expense transactions", count);
         return count;
     }
 }

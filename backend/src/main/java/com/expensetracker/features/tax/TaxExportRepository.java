@@ -1,6 +1,10 @@
 package com.expensetracker.features.tax;
 
-import com.expensetracker.entity.User;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,10 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import com.expensetracker.entity.User;
 
 @Repository
 public interface TaxExportRepository extends JpaRepository<TaxExport, Long> {
@@ -126,7 +127,7 @@ public interface TaxExportRepository extends JpaRepository<TaxExport, Long> {
                         @Param("futureDate") LocalDate futureDate);
 
         // Get average processing time (for performance monitoring)
-        @Query("SELECT AVG(DATEDIFF(te.generatedAt, te.createdAt)) FROM TaxExport te WHERE te.user = :user AND te.status = 'COMPLETED'")
+        @Query(value = "SELECT AVG(EXTRACT(EPOCH FROM (CAST(te.generated_at AS TIMESTAMP) - te.created_at)) / 86400) FROM tax_exports te WHERE te.user_id = :#{#user.id} AND te.status = 'COMPLETED'", nativeQuery = true)
         Double getAverageProcessingTime(@Param("user") User user);
 
         // Find exports with business expenses

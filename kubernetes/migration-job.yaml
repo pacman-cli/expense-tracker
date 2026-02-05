@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration
+  namespace: takatrack
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      containers:
+        - name: migration-task
+          image: 135247151840.dkr.ecr.us-east-1.amazonaws.com/takatrack-backend:latest
+          imagePullPolicy: Always
+          # Run Spring Boot in 'none' web mode to purely execute startup beans (like Flyway) then exit
+          command: ["java", "-Dspring.profiles.active=prod", "-Dspring.main.web-application-type=none", "-Dspring.flyway.enabled=true", "-jar", "/app/app.jar"]
+          env:
+            - name: SPRING_FLYWAY_REPAIR_ON_VALIDATE_FAILURE
+              value: "true"
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: db_url
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_password
+            - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+              value: "true"
+            - name: SPRING_FLYWAY_BASELINE_VERSION
+              value: "1"
+            - name: SPRING_FLYWAY_VALIDATE_ON_MIGRATE
+              value: "false"
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "none"
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: gemini_api_key
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      restartPolicy: Never

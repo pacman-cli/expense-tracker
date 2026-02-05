@@ -405,7 +405,7 @@ public class ReceiptService {
         expense = expenseRepository.save(expense);
 
         // Link receipt to expense
-        receipt.setExpense(expense);
+        receipt.setLinkedExpenseId(expense.getId());
         receiptRepository.save(receipt);
 
         return expense;
@@ -515,11 +515,6 @@ public class ReceiptService {
      */
     @Transactional(readOnly = true)
     public ReceiptStatistics getStatistics(User user) {
-        List<Object[]> stats = receiptRepository.getReceiptStatisticsByUser(
-            user
-        );
-
-        long total = receiptRepository.count();
         long completed = receiptRepository.countByUserAndStatus(
             user,
             Receipt.ProcessingStatus.COMPLETED
@@ -536,6 +531,8 @@ public class ReceiptService {
             user,
             Receipt.ProcessingStatus.MANUAL_REVIEW_NEEDED
         );
+
+        long total = completed + pending + failed + needsReview;
 
         return new ReceiptStatistics(
             total,

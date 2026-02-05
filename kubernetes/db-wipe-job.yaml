@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-wipe
+  namespace: takatrack
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    spec:
+      containers:
+        - name: wipe-db
+          image: mysql:8.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD -e "DROP DATABASE IF EXISTS takatrack; CREATE DATABASE takatrack;"
+          env:
+            - name: DB_HOST
+              value: takatrack-db.cwl62cq0ol75.us-east-1.rds.amazonaws.com
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_password
+      restartPolicy: Never

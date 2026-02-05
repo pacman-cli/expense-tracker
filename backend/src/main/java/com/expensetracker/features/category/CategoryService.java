@@ -51,8 +51,15 @@ public class CategoryService {
         return convertToDTO(updated);
     }
 
-    public void deleteCategory(Long id) {
-        categoryRepository.deleteById(id);
+    public void deleteCategory(Long id, Long userId) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        if (!category.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized: You can only delete your own categories");
+        }
+
+        categoryRepository.delete(category);
     }
 
     private CategoryDTO convertToDTO(Category category) {

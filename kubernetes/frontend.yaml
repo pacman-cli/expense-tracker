@@ -4,7 +4,7 @@ metadata:
   name: frontend
   namespace: takatrack
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: <ECR_REPO_FRONTEND>:<TAG>
+        image: 135247151840.dkr.ecr.us-east-1.amazonaws.com/takatrack-frontend:latest
         ports:
         - containerPort: 3000
         env:
@@ -23,11 +23,11 @@ spec:
           value: "http://backend.takatrack.svc.cluster.local/api" # Internal cluster URL or external Ingress URL
         resources:
           requests:
-            cpu: "100m"
-            memory: "256Mi"
+            cpu: "50m"
+            memory: "32Mi"
           limits:
             cpu: "200m"
-            memory: "512Mi"
+            memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service

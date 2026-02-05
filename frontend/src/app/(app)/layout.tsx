@@ -1,45 +1,46 @@
-"use client";
+"use client"
 
-import { Sidebar } from "@/components/layout/sidebar";
-import { Button } from "@/components/ui/button";
-import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { LogOut, Menu } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sidebar } from "@/components/layout/sidebar"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from "@/components/ui/button"
+import { FloatingActionButton } from "@/components/ui/floating-action-button"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { LogOut, Menu } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 export default function DashboardLayout({
     children,
 }: {
-    children: React.ReactNode;
+    children: React.ReactNode
 }) {
-    const router = useRouter();
+    const router = useRouter()
 
     const handleLogout = () => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        router.push("/");
-    };
+        localStorage.removeItem("accessToken")
+        localStorage.removeItem("refreshToken")
+        router.push("/")
+    }
 
     // Suppress hydration warnings caused by browser extensions
     useEffect(() => {
-        const originalError = console.error;
+        const originalError = console.error
         console.error = (...args) => {
             if (
                 typeof args[0] === "string" &&
                 (args[0].includes("Hydration") || args[0].includes("hydration"))
             ) {
-                return;
+                return
             }
-            originalError.apply(console, args);
-        };
+            originalError.apply(console, args)
+        }
 
         return () => {
-            console.error = originalError;
-        };
-    }, []);
+            console.error = originalError
+        }
+    }, [])
 
-    const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const [isMobileOpen, setIsMobileOpen] = useState(false)
 
     return (
         <div
@@ -59,7 +60,7 @@ export default function DashboardLayout({
             </Sheet>
 
             <main className="flex-1 flex flex-col min-h-screen md:pl-64 transition-all duration-300 ease-in-out" suppressHydrationWarning>
-                <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border">
+                <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-background/60 backdrop-blur-xl border-b border-border/50 supports-[backdrop-filter]:bg-background/60">
                     <div className="flex items-center gap-2 md:hidden">
                         <Button variant="ghost" size="icon" onClick={() => setIsMobileOpen(true)}>
                             <Menu className="h-5 w-5" />
@@ -69,11 +70,14 @@ export default function DashboardLayout({
                         </span>
                     </div>
 
-                    <div className="flex-1 flex justify-end">
+                    <div className="flex-1 flex justify-end items-center gap-2">
+                        <div className="md:hidden">
+                            <ThemeToggle />
+                        </div>
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="text-muted-foreground hover:text-destructive"
+                            className="text-muted-foreground hover:text-destructive transition-colors"
                             onClick={handleLogout}
                         >
                             <LogOut className="mr-2 h-4 w-4" />
@@ -85,5 +89,5 @@ export default function DashboardLayout({
             </main>
             <FloatingActionButton />
         </div>
-    );
+    )
 }
