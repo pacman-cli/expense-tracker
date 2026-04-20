@@ -318,7 +318,7 @@ export default function AIPredictionsPage() {
                     <Card className="glass-card border-none overflow-hidden relative group hover:scale-[1.02] transition-transform duration-300">
                         <CardContent className="p-6">
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20">
+                                <div className="p-3 rounded-xl bg-linear-to-br from-green-500/20 to-emerald-500/20">
                                     <Target className="h-6 w-6 text-green-400" />
                                 </div>
                             </div>
