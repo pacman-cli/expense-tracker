@@ -539,7 +539,7 @@ export default function AIPredictionsPage() {
                                     </p>
                                     <Button
                                         onClick={generatePredictions}
-                                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl"
+                                        className="bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl"
                                     >
                                         <Zap className="mr-2 h-4 w-4" />
                                         Generate Predictions
