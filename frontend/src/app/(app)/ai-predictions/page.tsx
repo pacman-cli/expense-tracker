@@ -525,7 +525,7 @@ export default function AIPredictionsPage() {
                             animate={{ opacity: 1, scale: 1 }}
                             className="col-span-full"
                         >
-                            <Card className="glass-card border-none border-dashed border-2 border-white/20">
+                            <Card className="glass-card border-none">
                                 <CardContent className="flex flex-col items-center justify-center py-20">
                                     <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 mb-6">
                                         <Brain className="h-16 w-16 text-purple-400" />
