@@ -429,7 +429,10 @@ export default function AIPredictionsPage() {
                                                     color: "#fff",
                                                     padding: "12px",
                                                 }}
-                                                formatter={(value: number) => `৳${value.toFixed(2)}`}
+                                                formatter={(value: number | string | Array<number | string>) => {
+                                                    const numValue = typeof value === 'number' ? value : Number(value);
+                                                    return `৳${isNaN(numValue) ? "0.00" : numValue.toFixed(2)}`;
+                                                }}
                                             />
                                         </PieChart>
                                     </ResponsiveContainer>
