@@ -493,7 +493,7 @@ export default function AIPredictionsPage() {
                         variant={activeTab === tab.key ? "default" : "outline"}
                         onClick={() => setActiveTab(tab.key)}
                         className={`flex items-center gap-2 rounded-xl ${activeTab === tab.key
-                            ? "bg-gradient-to-r from-purple-500 to-pink-500"
+                            ? "bg-linear-to-r from-purple-500 to-pink-500"
                             : ""
                             }`}
                     >
