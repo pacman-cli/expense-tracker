@@ -73,8 +73,21 @@ antigravitydemo is a modern expense tracking application designed to help users 
 
 - **Docker & Docker Compose**
 - **Maven**
+- **Terraform** (Infrastructure as Code)
+- **AWS** (ECS, Fargate, RDS, S3, CloudFront, ALB)
 
 ---
+
+## Infrastructure
+
+The production environment is hosted on AWS using a serverless architecture:
+
+- **Frontend**: Hosted on S3 with CloudFront CDN for global low-latency access.
+- **Backend**: Runs on ECS Fargate (Serverless Containers) for scalability.
+- **Database**: RDS PostgreSQL in a private subnet for security.
+- **Networking**: VPC with public/private isolation and Application Load Balancer.
+
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Project Structure
 

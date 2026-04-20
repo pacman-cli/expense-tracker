@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
+    parallelServerBuildTraces: false,
     parallelServerCompiles: true,
   },
 }

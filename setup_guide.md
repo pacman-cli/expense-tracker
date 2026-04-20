@@ -1,98 +1,142 @@
-## 💻 Environment Setup (macOS)
+# 🏗️ TakaTrack: AWS Production Infrastructure Guide
 
-Before you begin, ensure you have [Homebrew](https://brew.sh/) installed.
+This comprehensive guide covers the professional setup of the **TakaTrack** infrastructure on AWS. We use a "Secure-by-Design" architecture with isolated private subnets, managed databases, and enterprise-grade Kubernetes scaling.
 
-### 1. Install DevOps Tools
-Run the following command to install all necessary tools at once:
+---
+
+## 🛠️ Phase 0: macOS Environment Setup
+
+Ensure you have [Homebrew](https://brew.sh/) installed, then run:
+
+### 1. Install DevOps Toolchain
 ```bash
 brew install awscli terraform kubectl helm
 ```
 
-### 2. Configure AWS CLI
-If you are using an **AWS Student Account (AWS Educate/Academy)**, you typically get temporary credentials.
-1. Run `aws configure`.
-2. Enter your `Access Key ID` and `Secret Access Key` from the portal.
-3. Set default region to `us-east-1` (common for student accounts).
-4. **Note:** Student accounts often require a `Session Token`. If provided, you must manually add `aws_session_token` to your `~/.aws/credentials` file.
+### 2. AWS Student Account Authentication
+If using a Student Account (Educate/Academy), you MUST handle **Session Tokens**:
+1. Open your AWS Portal and copy the **AWS CLI Credentials**.
+2. Run `aws configure` and input Key/Secret.
+3. Open `~/.aws/credentials` and paste the `aws_session_token` provided by the portal.
+4. Verify access: `aws sts get-caller-identity`
 
-### 3. Verify Installations
-```bash
-aws --version
-terraform -version  # Should be >= 1.5.0
-kubectl version --client
-helm version
+---
+
+## 🏗️ Phase 1: Infrastructure as Code (Terraform)
+
+The Terraform configuration builds a production-grade VPC, Eks Cluster, and RDS Database.
+
+### 1. Configure Variables
+Navigate to `terraform/` and create `terraform.tfvars`:
+```hcl
+aws_region     = "us-east-1"
+project_name   = "takatrack"
+db_username    = "admin"
+db_password    = "your_SUPER_secure_password" # Use min 16 chars
+domain_name    = "puspo.online"
+subdomain_name = "takatrack.puspo.online"
 ```
 
-## 🔑 GitHub Secrets Configuration
-In your GitHub repo, go to **Settings > Secrets and variables > Actions** and add:
+### 2. Deployment
+```bash
+terraform init
+terraform plan
+terraform apply --auto-approve
+```
 
-| Secret Name | Description |
-| :--- | :--- |
-| `AWS_ACCESS_KEY_ID` | Your AWS Access Key |
-| `AWS_SECRET_ACCESS_KEY` | Your AWS Secret Key |
-| `AWS_SESSION_TOKEN` | (Required for Student Accounts) |
-| `AWS_REGION` | e.g., `us-east-1` |
-| `DB_PASSWORD` | Secure password for RDS |
+### 3. Capture Outputs
+After successful application, note the following from the console:
+- `eks_cluster_name`
+- `rds_endpoint`
+- `acm_certificate_arn`
 
-> [!TIP]
-> **AWS Student Account Management**: With a $113 credit, monitor your usage in the **AWS Billing Dashboard**. EKS clusters cost ~$72/month, so ensure you `terraform destroy` when not active to preserve your credits!
+---
 
-## Step 1: Infrastructure Deployment (Terraform)
-1. Navigate to the `terraform` directory.
-2. Create a `terraform.tfvars` file with your credentials:
-   ```hcl
-   db_username = "admin"
-   db_password = "your-secure-password"
-   aws_region  = "us-east-1"
-   domain_name = "puspo.online"
-   subdomain_name = "takatrack.puspo.online"
-   ```
-3. Initialize and apply:
-   ```bash
-   terraform init
-   terraform plan
-   terraform apply
-   ```
-4. Note the outputs (EKS Cluster Name, RDS Endpoint, ACM Certificate ARN).
+## ☸️ Phase 2: Kubernetes Orchestration
 
-## Step 2: Kubernetes Configuration
-1. Update your kubeconfig:
-   ```bash
-   aws eks update-kubeconfig --name takatrack-eks --region us-east-1
-   ```
-2. Update placeholders in `kubernetes/secrets.yaml` and `kubernetes/ingress.yaml` with the values from Step 1.
-3. Apply the manifests (initially for manual verification if needed, or let CI/CD handle it).
+### 1. Connect to Cluster
+```bash
+aws eks update-kubeconfig --name takatrack-production --region us-east-1
+```
 
-## Step 3: GitHub Actions Setup
-1. Add the following secrets to your GitHub repository:
-   - `AWS_ACCESS_KEY_ID`
-   - `AWS_SECRET_ACCESS_KEY`
-2. Push your code to the `main` branch to trigger the deployment.
+### 2. Database Integration
+Update `kubernetes/secrets.yaml` with your RDS endpoint and credentials:
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: takatrack-secrets
+stringData:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://<RDS_ENDPOINT>:5432/takatrack"
+  SPRING_DATASOURCE_USERNAME: "admin"
+  SPRING_DATASOURCE_PASSWORD: "<DB_PASSWORD>"
+```
 
-## Step 4: Domain DNS Configuration (Namecheap)
-1. Go to your Namecheap Dashboard.
-2. Select your domain `puspo.online`.
-3. Add a CNAME record:
+### 3. Ingress & SSL Setup
+Edit `kubernetes/ingress.yaml` and replace `<ACM_CERTIFICATE_ARN>` with the ARN from Terraform outputs.
+
+### 4. Deploy Manifests
+```bash
+kubectl apply -f kubernetes/namespace.yaml
+kubectl apply -f kubernetes/secrets.yaml
+kubectl apply -f kubernetes/backend.yaml
+kubectl apply -f kubernetes/frontend.yaml
+kubectl apply -f kubernetes/ingress.yaml
+kubectl apply -f kubernetes/hpa.yaml
+```
+
+---
+
+## 🌐 Phase 3: Networking & DNS
+
+### 1. Retrieve ALB DNS
+Wait ~5 minutes for the AWS Application Load Balancer to provision:
+```bash
+kubectl get ingress -n takatrack
+```
+Copy the **ADDRESS** (e.g., `k8s-takatrac-xxxxx.us-east-1.elb.amazonaws.com`).
+
+### 2. Configure Namecheap
+1. Log in to Namecheap -> Domain List -> **Manage**.
+2. **Advanced DNS** -> Add New Record.
+3. Select **CNAME Record**:
    - Host: `takatrack`
-   - Value: [The ALB DNS Name from AWS Console or Terraform]
-4. Add ACM Validation records (CNAME) provided by AWS ACM in the console.
+   - Value: `<ALB_DNS_NAME>`
+4. Save All Changes.
 
-## Step 5: Monitoring Setup
-1. Install Prometheus and Grafana using Helm:
-   ```bash
-   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-   helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
-   ```
-2. Apply the custom alerts and dashboards from the `monitoring` directory.
+---
 
-## Step 6: Load Testing
-1. Install JMeter locally.
-2. Run the tests:
-   ```bash
-   jmeter -n -t tests/load/backend_api_test.jmx -l results.jtl -e -o reports/
-   ```
+## 📊 Phase 4: Monitoring & Maintenance
 
-## Troubleshooting
-- **Pod Crash**: Check logs using `kubectl logs <pod-name> -n takatrack`.
-- **Ingress Not Working**: Verify the ALB Controller is installed and the Ingress resource has the correct annotations.
-- **RDS Not Reachable**: Ensure EKS node security groups are allowed in the RDS security group.
+### 1. Install Prometheus & Grafana
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --create-namespace
+```
+
+### 2. Apply Custom Dashboards & Alerts
+The repository includes pre-configured monitoring assets:
+- **Prometheus Alerts**: `kubectl apply -f monitoring/prometheus-alerts.yaml`
+- **Grafana Dashboard**: Import the `monitoring/grafana-dashboard.json` file into your Grafana instance to visualize TakaTrack-specific metrics (RPS, Error Rates, HPA Status).
+
+---
+
+## 🔒 Security Hardening
+
+To maintain a secure environment:
+1. **Rotate Secrets**: Regularly update `SPRING_DATASOURCE_PASSWORD` and other secrets.
+2. **Private Subnets**: Ensure EKS nodes and RDS remain in private subnets with no direct internet access.
+3. **IAM Least Privilege**: Use IAM Roles for Service Accounts (IRSA) for pod-level AWS permissions.
+
+---
+
+## 💡 Troubleshooting & Tips
+
+- **Student Credits ($113)**: EKS costs ~$2.40/day. Run `terraform destroy` when you are not actively developing or presenting to save funds.
+- **Pod Logs**: `kubectl logs -l app=backend -n takatrack`
+- **DB Connection**: Ensure EKS Security Groups allow outbound 5432 to the RDS Security Group (Terraform handles this by default).
+
+---
+*Created by Antigravity AI for TakaTrack Production Excellence.*

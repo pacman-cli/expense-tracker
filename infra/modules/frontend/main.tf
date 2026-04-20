@@ -122,6 +122,40 @@ resource "aws_route53_record" "alias" {
   }
 }
 
+resource "aws_cloudfront_function" "url_rewrite" {
+  name    = "${var.project_name}-url-rewrite-${var.environment}"
+  runtime = "cloudfront-js-2.0"
+  comment = "Rewrite URLs for Next.js static export"
+  publish = true
+  code    = <<-EOF
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+
+  // Don't rewrite API, OAuth, or static asset paths
+  if (uri.startsWith('/api/') ||
+      uri.startsWith('/oauth2/') ||
+      uri.startsWith('/login/oauth2/') ||
+      uri.startsWith('/_next/') ||
+      uri.includes('.')) {
+    return request;
+  }
+
+  // Remove trailing slash if present (except for root)
+  if (uri.length > 1 && uri.endsWith('/')) {
+    uri = uri.slice(0, -1);
+  }
+
+  // Append .html for clean URLs
+  if (uri !== '/' && !uri.endsWith('.html')) {
+    request.uri = uri + '.html';
+  }
+
+  return request;
+}
+EOF
+}
+
 resource "aws_cloudfront_distribution" "frontend" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -156,6 +190,11 @@ resource "aws_cloudfront_distribution" "frontend" {
     cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.url_rewrite.arn
+    }
   }
 
   // API behavior: ALB
