@@ -67,8 +67,29 @@ export default function AIPredictionsPage() {
     const [activeTab, setActiveTab] = useState<"all" | "category" | "recurring" | "alerts">("all")
 
     useEffect(() => {
-        fetchPredictions()
-        fetchAccuracyStats()
+        const fetchPredictionsData = async () => {
+            try {
+                const res = await api.get("/predictions")
+                setPredictions(res.data)
+            } catch (error) {
+                console.error("Failed to fetch predictions", error)
+                toast.error("Failed to load predictions")
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        const fetchAccuracyStatsData = async () => {
+            try {
+                const res = await api.get("/predictions/accuracy")
+                setAccuracyStats(res.data)
+            } catch (error) {
+                console.error("Failed to fetch accuracy stats", error)
+            }
+        }
+
+        fetchPredictionsData()
+        fetchAccuracyStatsData()
     }, [])
 
     const fetchPredictions = async () => {
