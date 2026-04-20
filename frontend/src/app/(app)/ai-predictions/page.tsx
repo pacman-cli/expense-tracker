@@ -58,6 +58,27 @@ interface AccuracyStats {
     accuracyRate: number
     averageAccuracy: number
 }
+//main defined thing 
+type RechartsTooltipValue = string | number | ReadonlyArray<string | number> | undefined
+
+const COLORS = ["#3b82f6", "#a855f7", "#ec4899", "#10b981", "#f59e0b", "#06b6d4"]
+
+const safeNumber = (value: unknown, fallback = 0) => {
+    const parsed = typeof value === "number" ? value : Number(value)
+    return Number.isFinite(parsed) ? parsed : fallback
+}
+
+const formatCurrency = (value: RechartsTooltipValue) => {
+    const normalized = Array.isArray(value) ? value[0] : value
+    return `৳${safeNumber(normalized).toFixed(2)}`
+}
+
+const formatDate = (value: string) => {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? "Unknown date" : date.toLocaleDateString()
+}
+
+const formatPeriod = (value: string) => value.replace(/_/g, " ").toLowerCase()
 
 export default function AIPredictionsPage() {
     const [predictions, setPredictions] = useState<Prediction[]>([])
