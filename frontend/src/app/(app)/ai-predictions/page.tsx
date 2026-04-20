@@ -527,7 +527,7 @@ export default function AIPredictionsPage() {
                         >
                             <Card className="glass-card border-none">
                                 <CardContent className="flex flex-col items-center justify-center py-20">
-                                    <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 mb-6">
+                                    <div className="p-6 rounded-3xl bg-linear-to-br from-purple-500/20 to-pink-500/20 mb-6">
                                         <Brain className="h-16 w-16 text-purple-400" />
                                     </div>
                                     <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
