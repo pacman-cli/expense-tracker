@@ -605,7 +605,7 @@ export default function WalletsPage() {
                                                     ))}
                                                 </Pie>
                                                 <Tooltip
-                                                    formatter={(value: number) => `৳${value.toFixed(2)}`}
+                                                    formatter={(value) => `৳${Number(value || 0).toFixed(2)}`}
                                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                                 />
                                             </PieChart>

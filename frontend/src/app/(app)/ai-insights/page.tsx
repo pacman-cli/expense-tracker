@@ -381,7 +381,7 @@ export default function AIInsightsPage() {
                 <Tooltip
                   contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
                   itemStyle={{ color: '#fff' }}
-                  formatter={(value) => `৳${Number(value).toFixed(2)}`}
+                  formatter={(value) => `৳${Number(value || 0).toFixed(2)}`}
                   cursor={{ fill: 'transparent' }}
                 />
                 <Bar dataKey="total" radius={[8, 8, 0, 0]}>

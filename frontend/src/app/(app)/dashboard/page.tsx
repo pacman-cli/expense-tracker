@@ -575,7 +575,7 @@ export default function DashboardPage() {
                 <Tooltip
                   contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
                   itemStyle={{ color: '#fff' }}
-                  formatter={(value: number) => `৳${value.toFixed(2)}`}
+                  formatter={(value) => `৳${Number(value || 0).toFixed(2)}`}
                 />
                 <Area
                   type="monotone"
@@ -616,7 +616,7 @@ export default function DashboardPage() {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
                     itemStyle={{ color: '#fff' }}
-                    formatter={(value: number) => `৳${value.toFixed(2)}`}
+                    formatter={(value) => `৳${Number(value || 0).toFixed(2)}`}
                   />
                   <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-xs font-medium">
                     {categoryData.length} Categories

@@ -544,8 +544,8 @@ export default function IncomePage() {
                     borderRadius: "8px",
                     color: "#fff",
                   }}
-                  formatter={(value: number) => [
-                    `৳${value.toLocaleString()}`,
+                  formatter={(value) => [
+                    `৳${Number(value || 0).toLocaleString()}`,
                     "Income",
                   ]}
                 />
