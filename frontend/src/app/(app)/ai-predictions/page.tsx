@@ -563,7 +563,7 @@ export default function AIPredictionsPage() {
                                 >
                                     <Card className="glass-card border-none overflow-hidden relative group hover:shadow-xl transition-all duration-300">
                                         <div
-                                            className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-5 group-hover:opacity-10 transition-opacity`}
+                                            className={`absolute inset-0 bg-linear-to-br ${config.gradient} opacity-5 group-hover:opacity-10 transition-opacity`}
                                         />
 
                                         <CardHeader className="relative z-10 pb-3">
