@@ -238,7 +238,7 @@ export default function AIPredictionsPage() {
             >
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                        <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm">
+                        <div className="p-3 rounded-2xl bg-linear-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm">
                             <Brain className="h-8 w-8 text-purple-400" />
                         </div>
                         <div>
