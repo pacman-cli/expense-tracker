@@ -257,7 +257,7 @@ export default function AIPredictionsPage() {
                     <Button
                         onClick={generatePredictions}
                         disabled={generating}
-                        className="bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 rounded-xl"
+                        className="bg-linear-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 rounded-xl"
                     >
                         {generating ? (
                             <>
