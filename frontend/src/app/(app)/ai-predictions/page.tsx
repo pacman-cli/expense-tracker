@@ -242,7 +242,7 @@ export default function AIPredictionsPage() {
                             <Brain className="h-8 w-8 text-purple-400" />
                         </div>
                         <div>
-                            <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
+                            <h2 className="text-4xl font-bold tracking-tight bg-linear-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
                                 AI Expense Predictions
                             </h2>
                             <p className="text-muted-foreground mt-1 flex items-center gap-2">
