@@ -12,7 +12,19 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Check Vercel Secrets
+        id: check_secrets
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "VERCEL_TOKEN secret is not set in GitHub repository settings."
+            echo "Please add it to proceed with the Vercel deployment."
+            echo "missing_secret=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy Frontend to Vercel
+        if: steps.check_secrets.outputs.missing_secret != 'true'
         uses: amondnet/vercel-action@v20
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -22,5 +34,11 @@ jobs:
           vercel-args: "--prod"
 
       - name: Deploy Backend to Render
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
-          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "RENDER_DEPLOY_HOOK is not set, skipping backend deploy."
+          else
+            curl -X POST "$RENDER_DEPLOY_HOOK"
+          fi
